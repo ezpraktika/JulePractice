@@ -13,15 +13,51 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent)
 
     connect(server, SIGNAL(newConnection()), this, SLOT(slotNewConnection()));
 
-    txt = new QTextEdit;
-    txt->setReadOnly(true);
-    txt->append("server started");
+    createGui();
 
-    //Layout setup
-    QVBoxLayout* pvbxLayout = new QVBoxLayout;
-    pvbxLayout->addWidget(new QLabel("<H1>Server</H1>"));
-    pvbxLayout->addWidget(txt);
-    setLayout(pvbxLayout);
+}
+
+void MyServer::createGui(){
+
+    QPushButton *prevButton = new QPushButton("<<");
+    prevButton->setEnabled(false);
+
+    QPushButton *nextButton = new QPushButton(">>");
+    nextButton->setEnabled(false);
+
+    QLabel *logNumber = new QLabel("1");
+
+    QHBoxLayout *logButtonsLayout = new QHBoxLayout;
+    logButtonsLayout->addWidget(prevButton);
+    logButtonsLayout->addWidget(logNumber);
+    logButtonsLayout->addWidget(nextButton);
+
+
+    txt = new QTextEdit();
+    txt->setReadOnly(true);
+
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    scrollArea->setWidget(txt);
+
+    QVBoxLayout *leftPanelLayout = new QVBoxLayout();
+    leftPanelLayout->addWidget(scrollArea);
+    leftPanelLayout->addLayout(logButtonsLayout);
+
+
+    QPushButton *createShipButton = new QPushButton ("Добавить корабль");
+    QPushButton *deleteShipButton = new QPushButton ("Удалить корабль");
+
+    QVBoxLayout *rightPanelLayout = new QVBoxLayout;
+    rightPanelLayout->addWidget(createShipButton);
+    rightPanelLayout->addWidget(deleteShipButton);
+
+    QHBoxLayout *mainPanelLayout = new QHBoxLayout;
+    mainPanelLayout->addLayout(leftPanelLayout);
+    mainPanelLayout->addLayout(rightPanelLayout);
+
+    setLayout(mainPanelLayout);
 
 }
 

@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QScrollArea>
+#include <QPushButton>
 
 class MyServer : public QWidget
 {
@@ -18,6 +20,7 @@ private:
     QTextEdit *txt;
 
     //лист txt сделать
+    void createGui();
     void generateData();
     void sendAllData(QTcpSocket *socket);
 
