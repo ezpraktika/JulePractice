@@ -15,6 +15,8 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent)
 
     createGui();
 
+    txt->append("server started");
+
 }
 
 void MyServer::createGui(){
@@ -66,7 +68,7 @@ void MyServer::slotNewConnection(){
     connect(socket,SIGNAL(disconnected()),socket,SLOT(deleteLater()));
 
 
-    txt->append("connected!!!");
+    txt->append("client connected!!!");
     sendAllData(socket);
 }
 void MyServer::sendAllData(QTcpSocket *socket){
@@ -77,7 +79,8 @@ void MyServer::sendAllData(QTcpSocket *socket){
     //рандомы по данным -
     //foreach void generateData(DataStruct& ds)
     //
-    out<<quint16(0)<<quint16(3)<<quint16(4)<<quint16(5)<<QString("helloworld");
+    txt->append("send hw");
+    out<<quint16(0)<<QString("helloworld");
     out.device()->seek(0);
     out<<quint16(block.size()-sizeof(quint16));
     socket->write(block);

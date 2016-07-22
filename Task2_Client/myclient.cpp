@@ -13,6 +13,7 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
     this, SLOT(slotError(QAbstractSocket::SocketError))
     );*/
     createGui();
+    txt->append("client created");
 
 }
 
@@ -90,19 +91,18 @@ void MyClient::slotReadyRead()
         if (socket->bytesAvailable() < nextBlockSize) {
             break;
         }
-        quint16 a;
-        quint16 b;
-        quint16 c;
+
         QString str;
-        in >> a >> b>>c>>str;
-        txt->append(""+ QString(a) +" "+QString(b)+" "+QString(c)+" "+str);
+        in >> str;
+        qDebug()<<str;
+        txt->append("new data: " + str);
         nextBlockSize = 0;
     }
 }
 
 void MyClient::slotConnected()
 {
-    qDebug()<<"Received the connected() signal";
+    txt->append("Received the connected() signal");
 }
 
 MyClient::~MyClient()
