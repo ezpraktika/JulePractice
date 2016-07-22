@@ -6,10 +6,10 @@
 #include <QTextEdit>
 #include<QVBoxLayout>
 #include <QLabel>
-
-namespace Ui {
-class MyClient;
-}
+#include <QPushButton>
+#include <QCheckBox>
+#include <QSlider>
+#include <QScrollArea>
 
 class MyClient : public QWidget
 {
@@ -17,13 +17,15 @@ class MyClient : public QWidget
 
 public:
     explicit MyClient(const QString& host, int port, QWidget *parent = 0);
+
+    //нужен?
     ~MyClient();
 
 private:
     QTcpSocket *socket;
     QTextEdit *txt;
     quint16 nextBlockSize;
-    Ui::MyClient *ui;
+    void createGui();
 
 private slots:
     void slotConnected();

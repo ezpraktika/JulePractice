@@ -16,5 +16,3 @@ SOURCES += main.cpp\
         myclient.cpp
 
 HEADERS  += myclient.h
-
-FORMS    += myclient.ui

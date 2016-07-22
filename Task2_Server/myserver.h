@@ -16,11 +16,11 @@ class MyServer : public QWidget
 private:
     QTcpServer *server;
     QTextEdit *txt;
-   // quint16 nextBlockSize;
+
     //лист txt сделать
-   // void sendToClient(QTcpSocket* socket, const QString& message);
     void generateData();
     void sendAllData(QTcpSocket *socket);
+
 public:
     explicit MyServer(int port, QWidget *parent = 0);
 

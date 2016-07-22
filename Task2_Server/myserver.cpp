@@ -1,6 +1,6 @@
 #include "myserver.h"
 
-MyServer::MyServer(int port, QWidget *parent) : QWidget(parent)/*, nextBlockSize(0)*/
+MyServer::MyServer(int port, QWidget *parent) : QWidget(parent)
 {
     server = new QTcpServer(this);
     if(!server->listen(QHostAddress::Any , port)){
@@ -10,9 +10,6 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent)/*, nextBlockSize
     }
 
     //qDebug() << "Server started\n";
-
-    //МОЖНО УБРАТЬ THIS
-
 
     connect(server, SIGNAL(newConnection()), this, SLOT(slotNewConnection()));
 
