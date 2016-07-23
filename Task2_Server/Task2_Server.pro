@@ -16,6 +16,5 @@ SOURCES += main.cpp \
     myserver.cpp
 
 HEADERS  += \
-    myserver.h \
-    datastruct.h
+    myserver.h
 

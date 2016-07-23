@@ -13,6 +13,8 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        myclient.cpp
+        myclient.cpp \
+    shipitem.cpp
 
-HEADERS  += myclient.h
+HEADERS  += myclient.h \
+    shipitem.h

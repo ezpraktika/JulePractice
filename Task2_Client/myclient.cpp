@@ -23,14 +23,13 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
 void MyClient::createGui(){
 
     //панель отрисовки
-
+//QGraphicsItem
     scene = new QGraphicsScene;
     QGraphicsView *view = new QGraphicsView(scene);
 
     view->setRenderHint(QPainter::Antialiasing);
     view->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     scene->setSceneRect(0,0,screen.width()*PERCENT_OF_SCREEN,screen.height()*PERCENT_OF_SCREEN);
-
 
     QPen pen = QPen(Qt::red);
     QLineF topLine (scene->sceneRect().topLeft(),scene->sceneRect().topRight());
@@ -44,6 +43,7 @@ void MyClient::createGui(){
     scene->addLine(leftLine,pen);
 
     //панель управления отрисовкой
+
     QPushButton *connectButton = new QPushButton("Connect");
 
     QCheckBox *showPathCheckBox = new QCheckBox("Путь");
