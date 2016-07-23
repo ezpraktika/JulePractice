@@ -108,10 +108,9 @@ void MyClient::createGui(){
 
     txtStack = new QStackedWidget;
     txtStack->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Expanding);
-    //txtStack->setMaximumWidth(scene->width()*0.3f);
-    //txtStack->setMaximumHeight(scene->height());
-    int a = txtStack->addWidget(new QTextEdit);
-qDebug()<<a;
+    QTextEdit *txt = new QTextEdit;
+    txt->setReadOnly(true);
+    txtStack->addWidget(txt);
 
 
     //правая часть окна

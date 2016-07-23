@@ -10,6 +10,13 @@
 #include <QLabel>
 #include <QScrollArea>
 #include <QPushButton>
+#include <QRect>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QSizePolicy>
+#include <QStackedWidget>
+
+#define PERCENT_OF_SCREEN 0.5f
 
 class MyServer : public QWidget
 {
@@ -17,7 +24,8 @@ class MyServer : public QWidget
 
 private:
     QTcpServer *server;
-    QTextEdit *txt;
+    QStackedWidget *txtStack;
+    QRect screen;
 
     //лист txt сделать
     void createGui();

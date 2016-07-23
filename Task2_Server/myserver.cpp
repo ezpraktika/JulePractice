@@ -10,38 +10,49 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent)
     }
 
     //qDebug() << "Server started\n";
+    screen = QApplication::desktop()->screenGeometry();
 
     connect(server, SIGNAL(newConnection()), this, SLOT(slotNewConnection()));
 
     createGui();
 
-    txt->append("server started");
+    //txt->append("server started");
 
 }
 
 void MyServer::createGui(){
 
     QPushButton *prevButton = new QPushButton("<<");
+    prevButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     prevButton->setEnabled(false);
 
     QPushButton *nextButton = new QPushButton(">>");
+    nextButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     nextButton->setEnabled(false);
 
     QLabel *logNumber = new QLabel("1");
+    logNumber->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     QHBoxLayout *logButtonsLayout = new QHBoxLayout;
     logButtonsLayout->addWidget(prevButton);
+    logButtonsLayout->insertStretch(-1);
     logButtonsLayout->addWidget(logNumber);
+    logButtonsLayout->insertStretch(-1);
     logButtonsLayout->addWidget(nextButton);
 
 
-    txt = new QTextEdit();
+    txtStack = new QStackedWidget;
+    txtStack->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Expanding);
+    txtStack->setFixedSize(screen.width()*PERCENT_OF_SCREEN*PERCENT_OF_SCREEN*0.7f, screen.height()*PERCENT_OF_SCREEN*0.7f);
+    QTextEdit *txt = new QTextEdit;
     txt->setReadOnly(true);
+    txtStack->addWidget(txt);
+
 
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scrollArea->setWidget(txt);
+    scrollArea->setWidget(txtStack);
 
     QVBoxLayout *leftPanelLayout = new QVBoxLayout();
     leftPanelLayout->addWidget(scrollArea);
@@ -54,13 +65,14 @@ void MyServer::createGui(){
     QVBoxLayout *rightPanelLayout = new QVBoxLayout;
     rightPanelLayout->addWidget(createShipButton);
     rightPanelLayout->addWidget(deleteShipButton);
+    rightPanelLayout->insertStretch(-1);
 
     QHBoxLayout *mainPanelLayout = new QHBoxLayout;
     mainPanelLayout->addLayout(leftPanelLayout);
     mainPanelLayout->addLayout(rightPanelLayout);
 
     setLayout(mainPanelLayout);
-
+    setFixedSize(sizeHint().width(),sizeHint().height());
 }
 
 void MyServer::slotNewConnection(){
@@ -68,7 +80,7 @@ void MyServer::slotNewConnection(){
     connect(socket,SIGNAL(disconnected()),socket,SLOT(deleteLater()));
 
 
-    txt->append("client connected!!!");
+    //txt->append("client connected!!!");
     sendAllData(socket);
 }
 void MyServer::sendAllData(QTcpSocket *socket){
@@ -79,7 +91,7 @@ void MyServer::sendAllData(QTcpSocket *socket){
     //рандомы по данным -
     //foreach void generateData(DataStruct& ds)
     //
-    txt->append("send hw");
+    //txt->append("send hw");
     out<<quint16(0)<<QString("helloworld");
     out.device()->seek(0);
     out<<quint16(block.size()-sizeof(quint16));
