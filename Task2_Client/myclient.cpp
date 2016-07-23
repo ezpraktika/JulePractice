@@ -19,7 +19,27 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
 
 void MyClient::createGui(){
 
+    //панель отрисовки
+
+    scene = new QGraphicsScene;
+    QGraphicsView *view = new QGraphicsView(scene);
+    view->setRenderHint(QPainter::Antialiasing);
+    scene->setSceneRect(0,0,700,400);
+
+    QPen pen = QPen(Qt::red);
+    QLineF topLine (scene->sceneRect().topLeft(),scene->sceneRect().topRight());
+    QLineF rightLine (scene->sceneRect().topRight(),scene->sceneRect().bottomRight());
+    QLineF bottomLine (scene->sceneRect().bottomLeft(),scene->sceneRect().bottomRight());
+    QLineF leftLine (scene->sceneRect().topLeft(),scene->sceneRect().bottomLeft());
+
+    scene->addLine(topLine,pen);
+    scene->addLine(rightLine,pen);
+    scene->addLine(bottomLine,pen);
+    scene->addLine(leftLine,pen);
+
+    //панель управления отрисовкой
     QPushButton *connectButton = new QPushButton("Connect");
+    connectButton->setMinimumHeight(40);
 
     QCheckBox *showPathCheckBox = new QCheckBox("Путь");
     QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора");
@@ -28,21 +48,38 @@ void MyClient::createGui(){
     QLabel *pathSizeLabel = new QLabel("Ширина пути");
 
     QSlider *shipSizeSlider = new QSlider(Qt::Horizontal);
+    shipSizeSlider->setMaximumWidth(120);
     QSlider *pathSizeSlider = new QSlider(Qt::Horizontal);
+    pathSizeSlider->setMaximumWidth(120);
 
-    QGridLayout *controlButtonsLayout = new QGridLayout;
-    controlButtonsLayout->addWidget(connectButton,0,0);
-    controlButtonsLayout->addWidget(showPathCheckBox,0,1);
-    controlButtonsLayout->addWidget(shipSizeLabel,0,2);
-    controlButtonsLayout->addWidget(shipSizeSlider,0,3);
-    controlButtonsLayout->addWidget(showViewCheckBox,1,1);
-    controlButtonsLayout->addWidget(pathSizeLabel,1,2);
-    controlButtonsLayout->addWidget(pathSizeSlider,1,3);
+    QVBoxLayout *checkBoxLayout = new QVBoxLayout;
+    checkBoxLayout->addWidget(showPathCheckBox);
+    checkBoxLayout->addWidget(showViewCheckBox);
 
+    QVBoxLayout *labelLayout = new QVBoxLayout;
+    labelLayout->addWidget(shipSizeLabel);
+    labelLayout->addWidget(pathSizeLabel);
+
+    QVBoxLayout *sliderLayout = new QVBoxLayout;
+    sliderLayout->addWidget(shipSizeSlider);
+    sliderLayout->addWidget(pathSizeSlider);
+
+    QHBoxLayout *controlButtons= new QHBoxLayout;
+    controlButtons->addWidget(connectButton);
+    controlButtons->addSpacing(100);
+    controlButtons->addLayout(checkBoxLayout);
+    controlButtons->addSpacing(60);
+    controlButtons->addLayout(labelLayout);
+    controlButtons->addLayout(sliderLayout);
+    controlButtons->addSpacing(80);
+
+    //левая часть окна
 
     QVBoxLayout *leftPanelLayout = new QVBoxLayout;
-    leftPanelLayout->addLayout(controlButtonsLayout);
+    leftPanelLayout->addWidget(view);
+    leftPanelLayout->addLayout(controlButtons);
 
+    //панель управления логами
 
     QPushButton *prevButton = new QPushButton("<<");
     prevButton->setEnabled(false);
@@ -57,18 +94,20 @@ void MyClient::createGui(){
     logButtonsLayout->addWidget(logNumber);
     logButtonsLayout->addWidget(nextButton);
 
+    //поле логов
 
     txt = new QTextEdit();
     txt->setReadOnly(true);
+    txt->setMinimumSize(180,425);
+    txt->setMaximumWidth(165);
 
-    QScrollArea *scrollArea = new QScrollArea;
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scrollArea->setWidget(txt);
+    //правая часть окна
 
     QVBoxLayout *rightPanelLayout = new QVBoxLayout();
-    rightPanelLayout->addWidget(scrollArea);
+    rightPanelLayout->addWidget(txt);
     rightPanelLayout->addLayout(logButtonsLayout);
+
+    //интерфейс целиком
 
     QHBoxLayout *mainPanelLayout = new QHBoxLayout;
     mainPanelLayout->addLayout(leftPanelLayout);
