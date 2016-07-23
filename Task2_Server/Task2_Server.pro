@@ -16,5 +16,6 @@ SOURCES += main.cpp \
     myserver.cpp
 
 HEADERS  += \
-    myserver.h
+    myserver.h \
+    shipitemstruct.h
 

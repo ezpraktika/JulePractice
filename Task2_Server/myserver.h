@@ -15,6 +15,10 @@
 #include <QDesktopWidget>
 #include <QSizePolicy>
 #include <QStackedWidget>
+#include <QTimer>
+#include <QVector>
+
+#include "shipitemstruct.h"
 
 #define PERCENT_OF_SCREEN 0.5f
 
@@ -26,11 +30,14 @@ private:
     QTcpServer *server;
     QStackedWidget *txtStack;
     QRect screen;
-
+    QTimer *timer;
+    QTcpSocket *socket;
+    QVector <ShipItemStruct*> shipList;
+    quint16 shipCounter;
     //лист txt сделать
     void createGui();
-    void generateData();
-    void sendAllData(QTcpSocket *socket);
+    void generateData(ShipItemStruct *ship);
+
 
 public:
     explicit MyServer(int port, QWidget *parent = 0);
@@ -39,7 +46,8 @@ signals:
 
 public slots:
     void slotNewConnection();
-
+    void sendAllData();
+    void slotNewShip();
 };
 
 #endif // MYSERVER_H
