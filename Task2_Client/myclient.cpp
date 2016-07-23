@@ -4,6 +4,8 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
     QWidget(parent),
     nextBlockSize(0)
 {
+    screen = QApplication::desktop()->screenGeometry();
+
     socket=new QTcpSocket(this);
     socket->connectToHost(host,port);
 
@@ -13,8 +15,9 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
     this, SLOT(slotError(QAbstractSocket::SocketError))
     );*/
     createGui();
-    txt->append("client created");
-
+    //txt->append("client created");
+    QTextEdit *ae = (QTextEdit*)txtStack->widget(0);
+    ae->append("ye");
 }
 
 void MyClient::createGui(){
@@ -23,8 +26,11 @@ void MyClient::createGui(){
 
     scene = new QGraphicsScene;
     QGraphicsView *view = new QGraphicsView(scene);
+
     view->setRenderHint(QPainter::Antialiasing);
-    scene->setSceneRect(0,0,700,400);
+    view->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    scene->setSceneRect(0,0,screen.width()*PERCENT_OF_SCREEN,screen.height()*PERCENT_OF_SCREEN);
+
 
     QPen pen = QPen(Qt::red);
     QLineF topLine (scene->sceneRect().topLeft(),scene->sceneRect().topRight());
@@ -39,7 +45,6 @@ void MyClient::createGui(){
 
     //панель управления отрисовкой
     QPushButton *connectButton = new QPushButton("Connect");
-    connectButton->setMinimumHeight(40);
 
     QCheckBox *showPathCheckBox = new QCheckBox("Путь");
     QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора");
@@ -66,12 +71,12 @@ void MyClient::createGui(){
 
     QHBoxLayout *controlButtons= new QHBoxLayout;
     controlButtons->addWidget(connectButton);
-    controlButtons->addSpacing(100);
+    controlButtons->insertStretch(-1);
     controlButtons->addLayout(checkBoxLayout);
-    controlButtons->addSpacing(60);
+    controlButtons->insertStretch(-1);
     controlButtons->addLayout(labelLayout);
     controlButtons->addLayout(sliderLayout);
-    controlButtons->addSpacing(80);
+    controlButtons->insertStretch(-1);
 
     //левая часть окна
 
@@ -82,38 +87,49 @@ void MyClient::createGui(){
     //панель управления логами
 
     QPushButton *prevButton = new QPushButton("<<");
+    prevButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     prevButton->setEnabled(false);
 
     QPushButton *nextButton = new QPushButton(">>");
+    nextButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     nextButton->setEnabled(false);
 
     QLabel *logNumber = new QLabel("1");
+    logNumber->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     QHBoxLayout *logButtonsLayout = new QHBoxLayout;
     logButtonsLayout->addWidget(prevButton);
+    logButtonsLayout->insertStretch(-1);
     logButtonsLayout->addWidget(logNumber);
+    logButtonsLayout->insertStretch(-1);
     logButtonsLayout->addWidget(nextButton);
 
     //поле логов
 
-    txt = new QTextEdit();
-    txt->setReadOnly(true);
-    txt->setMinimumSize(180,425);
-    txt->setMaximumWidth(165);
+    txtStack = new QStackedWidget;
+    txtStack->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Expanding);
+    //txtStack->setMaximumWidth(scene->width()*0.3f);
+    //txtStack->setMaximumHeight(scene->height());
+    int a = txtStack->addWidget(new QTextEdit);
+qDebug()<<a;
+
 
     //правая часть окна
 
     QVBoxLayout *rightPanelLayout = new QVBoxLayout();
-    rightPanelLayout->addWidget(txt);
+    rightPanelLayout->addWidget(txtStack);
     rightPanelLayout->addLayout(logButtonsLayout);
 
     //интерфейс целиком
 
     QHBoxLayout *mainPanelLayout = new QHBoxLayout;
+
     mainPanelLayout->addLayout(leftPanelLayout);
     mainPanelLayout->addLayout(rightPanelLayout);
 
     setLayout(mainPanelLayout);
+    setFixedSize(sizeHint().width(),sizeHint().height());
+
 }
 
 void MyClient::slotReadyRead()
@@ -134,14 +150,14 @@ void MyClient::slotReadyRead()
         QString str;
         in >> str;
         qDebug()<<str;
-        txt->append("new data: " + str);
+        //txt->append("new data: " + str);
         nextBlockSize = 0;
     }
 }
 
 void MyClient::slotConnected()
 {
-    txt->append("Received the connected() signal");
+   // txt->append("Received the connected() signal");
 }
 
 MyClient::~MyClient()

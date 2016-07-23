@@ -14,6 +14,13 @@
 #include <QGraphicsScene>
 #include <QGraphicsItem>
 #include <QPen>
+#include <QRect>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QSizePolicy>
+#include <QStackedWidget>
+
+#define PERCENT_OF_SCREEN 0.5f
 
 class MyClient : public QWidget
 {
@@ -27,10 +34,11 @@ public:
 
 private:
     QTcpSocket *socket;
-    QTextEdit *txt;
+    QStackedWidget *txtStack;
     quint16 nextBlockSize;
     QGraphicsScene *scene;
-    QTimer *timer;
+    QRect screen;
+
     void createGui();
 
 private slots:
