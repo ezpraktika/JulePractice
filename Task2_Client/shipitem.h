@@ -19,9 +19,16 @@ public:
     qreal pathLength;
 
 
+    quint16 shipSize;
+    bool isViewVisible;
+
+
     quint16 isNew;
     qreal startX;
     qreal startY;
+
+    qreal prevX;
+    qreal prevY;
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

@@ -46,12 +46,17 @@ void MyClient::createGui(){
     QCheckBox *showPathCheckBox = new QCheckBox("Путь");
     QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора");
     connect(showViewCheckBox,SIGNAL(toggled(bool)),this,SLOT(slotReactToToggleViewCheckBox(bool)));
+    showViewCheckBox->setChecked(true);
 
     QLabel *shipSizeLabel = new QLabel("Размер корабля");
     QLabel *pathSizeLabel = new QLabel("Ширина пути");
 
     QSlider *shipSizeSlider = new QSlider(Qt::Horizontal);
     shipSizeSlider->setMaximumWidth(120);
+    shipSizeSlider->setMinimum(1);
+    shipSizeSlider->setMaximum(5);
+    connect(shipSizeSlider,SIGNAL(valueChanged(int)),this,SLOT(slotShipResize(int)));
+
     QSlider *pathSizeSlider = new QSlider(Qt::Horizontal);
     pathSizeSlider->setMaximumWidth(120);
 
@@ -201,6 +206,8 @@ void MyClient::slotReactToToggleViewCheckBox(bool checked)
 {
    /* showView = checked;*/
     //как то передавать сцене?
+    ShipItem* a = (ShipItem*)scene->items().at(0);
+    a->isViewVisible = checked;
 }
 
 void MyClient::slotConnected()
@@ -208,6 +215,12 @@ void MyClient::slotConnected()
     qDebug()<<"nnice connct";
    // txt->append("Received the connected() signal");
 }
+
+void MyClient::slotShipResize(int val){
+    ShipItem* a = (ShipItem*)scene->items().at(0);
+    a->shipSize = val;
+}
+
 
 MyClient::~MyClient()
 {
