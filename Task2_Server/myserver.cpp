@@ -10,7 +10,6 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0)
         return;
     }
 
-    //qDebug() << "Server started\n";
     screen = QApplication::desktop()->screenGeometry();
 
     connect(server, SIGNAL(newConnection()), this, SLOT(slotNewConnection()));
@@ -19,8 +18,6 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0)
 
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(sendAllData()));
-    timer->start(2000);
-    //txt->append("server started");
 
 }
 
@@ -53,13 +50,8 @@ void MyServer::createGui(){
     txtStack->addWidget(txt);
 
 
-    QScrollArea *scrollArea = new QScrollArea;
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    scrollArea->setWidget(txtStack);
-
     QVBoxLayout *leftPanelLayout = new QVBoxLayout();
-    leftPanelLayout->addWidget(scrollArea);
+    leftPanelLayout->addWidget(txtStack);
     leftPanelLayout->addLayout(logButtonsLayout);
 
 
@@ -83,9 +75,6 @@ void MyServer::createGui(){
 void MyServer::slotNewConnection(){
     socket = server->nextPendingConnection();
     connect(socket,SIGNAL(disconnected()),socket,SLOT(deleteLater()));
-
-    //txt->append("client connected!!!");
-    //sendAllData(socket);
 }
 
 void MyServer::slotNewShip(){
@@ -97,6 +86,7 @@ void MyServer::slotNewShip(){
     if(!shipCounter){
         QTextEdit *txt = (QTextEdit*) txtStack->widget(0);
         txt->append("New Ship Created");
+        timer->start(2000);
     }
     else{
         QTextEdit *txt = new QTextEdit;
@@ -110,7 +100,7 @@ void MyServer::slotNewShip(){
 
 
 void MyServer::sendAllData(){
-qDebug()<<"hellp";
+    qDebug()<<"timer";
     QByteArray block;
     QDataStream out (&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
@@ -135,10 +125,24 @@ qDebug()<<"hellp";
 
         out.device()->seek(0);
         out<<quint16(block.size()-sizeof(quint16));
-        //socket->write(block);
+        socket->write(block);
         block.clear();
+
+
         QTextEdit *te = (QTextEdit*)txtStack->widget(i);
-        te->append("id: " + shipList.at(i)->id);
+        te->append(QString("Id: %1").arg(shipList.at(i)->id));
+
+        if(shipList.at(i)->isNew){
+            te->append(QString("Start X: %1\nStart Y: %2")
+                       .arg(shipList.at(i)->startX)
+                       .arg(shipList.at(i)->startY));
+        }
+
+        te->append(QString("Cource angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
+                       .arg(shipList.at(i)->courceAngle)
+                       .arg(shipList.at(i)->speed).arg(shipList.at(i)->viewAngle)
+                       .arg(shipList.at(i)->viewLength).arg("later").arg("later"));
+
         shipList.at(i)->isNew=0;
     }
 

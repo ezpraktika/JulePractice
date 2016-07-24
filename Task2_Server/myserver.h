@@ -17,6 +17,7 @@
 #include <QStackedWidget>
 #include <QTimer>
 #include <QVector>
+//#include <QtDebug>
 
 #include "shipitemstruct.h"
 
