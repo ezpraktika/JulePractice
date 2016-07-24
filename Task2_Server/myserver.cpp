@@ -86,7 +86,7 @@ void MyServer::slotNewShip(){
     if(!shipCounter){
         QTextEdit *txt = (QTextEdit*) txtStack->widget(0);
         txt->append("New Ship Created");
-        timer->start(1500); // TIMER
+        timer->start(100); // TIMER
     }
     else{
         QTextEdit *txt = new QTextEdit;
@@ -100,7 +100,7 @@ void MyServer::slotNewShip(){
 
 
 void MyServer::sendAllData(){
-    qDebug()<<"timer";
+
     QByteArray block;
     QDataStream out (&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
@@ -109,15 +109,13 @@ void MyServer::sendAllData(){
 
         generateData(shipList.at(i));
 
-
-        out<<quint16(0) << shipList.at(i)->isNew;
+        out<<quint16(0) << shipList.at(i)->id << shipList.at(i)->isNew;
 
         if(shipList.at(i)->isNew){
             out << shipList.at(i)->startX << shipList.at(i)->startY;
         }
 
-        out << shipList.at(i)->id
-            << shipList.at(i)->courceAngle
+        out << shipList.at(i)->courseAngle
             << shipList.at(i)->speed
             << shipList.at(i)->viewAngle
             << shipList.at(i)->viewLength;
@@ -138,8 +136,8 @@ void MyServer::sendAllData(){
                        .arg(shipList.at(i)->startY));
         }
 
-        te->append(QString("Cource angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
-                       .arg(shipList.at(i)->courceAngle)
+        te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
+                       .arg(shipList.at(i)->courseAngle)
                        .arg(shipList.at(i)->speed).arg(shipList.at(i)->viewAngle)
                        .arg(shipList.at(i)->viewLength).arg("later").arg("later"));
 
@@ -155,13 +153,16 @@ void MyServer::generateData(ShipItemStruct *ship){
         ship->id=shipCounter-1; //WARNIGNEINGEINGEINGE
         ship->startX=100;
         ship->startY=100;
-        ship->courceAngle=50.0f;
+        ship->courseAngle=90.0f; //SET ROTATION РАБОТАЕТ В ГРАДУСАХ
+        qDebug()<<"hello 0" <<ship->courseAngle;
         ship->isNew = 1;
-        ship->viewAngle = 30.0f;  //не забыть стартовать время и офать isNEW
-        ship->viewLength = 10;       //убрать из структуры время хотя надо переводить же етпаааиа
+        ship->viewAngle = 35.0f;  //не забыть стартовать время и офать isNEW
+        ship->viewLength = 100;       //убрать из структуры время хотя надо переводить же етпаааиа
         ship->speed=20;
     }
-    ship->courceAngle+=-5.0f; //здесь генерация
+    else{
+        ship->courseAngle+=-5.0f; //здесь генерация
+    }
 
 
 }

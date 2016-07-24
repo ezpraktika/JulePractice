@@ -11,7 +11,7 @@ class ShipItem : public QGraphicsItem
 public:
     ShipItem();
     quint16 id;
-    qreal courceAngle;
+    qreal courseAngle;
     quint16 speed;
     qreal viewAngle;
     quint16 viewLength;

@@ -51,6 +51,7 @@ private:
 private slots:
     void slotConnected();
     void slotReadyRead();
+    void slotReactToToggleViewCheckBox(bool checked);
 };
 
 #endif // MYCLIENT_H

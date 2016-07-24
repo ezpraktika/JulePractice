@@ -20,7 +20,7 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
 void MyClient::createGui(){
 
     //панель отрисовки
-//QGraphicsItem
+
     scene = new QGraphicsScene;
     QGraphicsView *view = new QGraphicsView(scene);
 
@@ -45,6 +45,7 @@ void MyClient::createGui(){
 
     QCheckBox *showPathCheckBox = new QCheckBox("Путь");
     QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора");
+    connect(showViewCheckBox,SIGNAL(toggled(bool)),this,SLOT(slotReactToToggleViewCheckBox(bool)));
 
     QLabel *shipSizeLabel = new QLabel("Размер корабля");
     QLabel *pathSizeLabel = new QLabel("Ширина пути");
@@ -144,61 +145,62 @@ void MyClient::slotReadyRead()
             break;
         }
 
-        quint16 isNew;
-        qreal inputStartX, inputStartY;
+        quint16 inputIsNew, inputID;
+        //qreal inputStartX, inputStartY;
 
-        in >> isNew;
-        if(isNew){
+        in >> inputID >> inputIsNew;
+
+        if(inputIsNew){
             ShipItem *ship = new ShipItem;
             shipList.append(ship);
             scene->addItem(ship);
+
             shipCounter++;
-            in >> inputStartX >> inputStartY;
 
+            in >> shipList.at(inputID)->startX
+               >> shipList.at(inputID)->startY;
         }
-
-        quint16 inputID;
-        in >> inputID;
 
         shipList.at(inputID)->id = inputID;
-        if (isNew){
-            shipList.at(inputID)->startX = inputStartX;
-            shipList.at(inputID)->startY = inputStartY;
-        }
-        shipList.at(inputID)->isNew = isNew;
+        shipList.at(inputID)->isNew = inputIsNew;
 
-
-        in >> shipList.at(inputID)->courceAngle
+        in >> shipList.at(inputID)->courseAngle
            >> shipList.at(inputID)->speed
            >> shipList.at(inputID)->viewAngle
            >> shipList.at(inputID)->viewLength;
         //time and path
 
 
-        //txt->append("new data: " + str);
-        if(shipCounter){
+        if(shipCounter-1){
             QTextEdit *txt = new QTextEdit;
             txt->setReadOnly(true);
             txt->append("New Ship Created");
             txtStack->addWidget(txt);
         }
+
         QTextEdit *te = (QTextEdit*)txtStack->widget(inputID);
         te->append(QString("Id: %1").arg(shipList.at(inputID)->id));
 
-        if(isNew){
+        if(shipList.at(inputID)->isNew){
             te->append(QString("Start X: %1\nStart Y: %2")
-                       .arg(inputStartX)
-                       .arg(inputStartY));
+                       .arg(shipList.at(inputID)->startX)
+                       .arg(shipList.at(inputID)->startY));
         }
 
-        te->append(QString("Cource angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
-                       .arg(shipList.at(inputID)->courceAngle)
+        te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
+                       .arg(shipList.at(inputID)->courseAngle)
                        .arg(shipList.at(inputID)->speed).arg(shipList.at(inputID)->viewAngle)
                        .arg(shipList.at(inputID)->viewLength).arg("later").arg("later"));
 
         nextBlockSize = 0;
     }
     scene->advance();
+}
+
+void MyClient::slotReactToToggleViewCheckBox(bool checked)
+{
+   /* showView = checked;*/
+    //как то передавать сцене?
 }
 
 void MyClient::slotConnected()
