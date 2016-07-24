@@ -6,8 +6,8 @@
 struct ShipItemStruct{
 
     quint16 isNew;
-    quint16 startX;
-    quint16 startY;
+    qreal startX;
+    qreal startY;
 
     quint16 id;
     qreal courceAngle;

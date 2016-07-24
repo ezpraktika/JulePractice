@@ -19,6 +19,7 @@
 #include <QDesktopWidget>
 #include <QSizePolicy>
 #include <QStackedWidget>
+#include <QTimer>
 
 #include "shipitem.h"
 
@@ -42,6 +43,8 @@ private:
     QRect screen;
     QVector <ShipItem*> shipList;
     quint16 shipCounter;
+
+    QTimer* timer;
 
     void createGui();
 

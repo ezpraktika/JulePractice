@@ -86,7 +86,7 @@ void MyServer::slotNewShip(){
     if(!shipCounter){
         QTextEdit *txt = (QTextEdit*) txtStack->widget(0);
         txt->append("New Ship Created");
-        timer->start(2000);
+        timer->start(1500); // TIMER
     }
     else{
         QTextEdit *txt = new QTextEdit;
@@ -155,13 +155,13 @@ void MyServer::generateData(ShipItemStruct *ship){
         ship->id=shipCounter-1; //WARNIGNEINGEINGEINGE
         ship->startX=100;
         ship->startY=100;
-        ship->courceAngle=0.0f;
+        ship->courceAngle=50.0f;
         ship->isNew = 1;
         ship->viewAngle = 30.0f;  //не забыть стартовать время и офать isNEW
         ship->viewLength = 10;       //убрать из структуры время хотя надо переводить же етпаааиа
-        ship->speed=5;
+        ship->speed=20;
     }
-    ship->courceAngle+=5.0f; //здесь генерация
+    ship->courceAngle+=-5.0f; //здесь генерация
 
 
 }

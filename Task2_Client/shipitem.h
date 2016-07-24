@@ -18,6 +18,11 @@ public:
     QTime time; //use start and elapsed
     qreal pathLength;
 
+
+    quint16 isNew;
+    qreal startX;
+    qreal startY;
+
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 

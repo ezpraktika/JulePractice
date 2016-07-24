@@ -126,6 +126,7 @@ void MyClient::createGui(){
     setLayout(mainPanelLayout);
     setFixedSize(sizeHint().width(),sizeHint().height());
 
+
 }
 
 void MyClient::slotReadyRead()
@@ -143,21 +144,29 @@ void MyClient::slotReadyRead()
             break;
         }
 
-        quint16 isNew, inputStartX, inputStartY;;
+        quint16 isNew;
+        qreal inputStartX, inputStartY;
 
         in >> isNew;
         if(isNew){
             ShipItem *ship = new ShipItem;
             shipList.append(ship);
+            scene->addItem(ship);
             shipCounter++;
             in >> inputStartX >> inputStartY;
-            //считать стартХ и стартУ и курс поместить созданный корабль на сцену по стартовым координатам
+
         }
 
         quint16 inputID;
         in >> inputID;
 
         shipList.at(inputID)->id = inputID;
+        if (isNew){
+            shipList.at(inputID)->startX = inputStartX;
+            shipList.at(inputID)->startY = inputStartY;
+        }
+        shipList.at(inputID)->isNew = isNew;
+
 
         in >> shipList.at(inputID)->courceAngle
            >> shipList.at(inputID)->speed
@@ -189,6 +198,7 @@ void MyClient::slotReadyRead()
 
         nextBlockSize = 0;
     }
+    scene->advance();
 }
 
 void MyClient::slotConnected()
