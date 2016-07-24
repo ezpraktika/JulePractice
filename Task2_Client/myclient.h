@@ -20,6 +20,8 @@
 #include <QSizePolicy>
 #include <QStackedWidget>
 
+#include "shipitem.h"
+
 #define PERCENT_OF_SCREEN 0.5f
 
 class MyClient : public QWidget
@@ -38,6 +40,8 @@ private:
     quint16 nextBlockSize;
     QGraphicsScene *scene;
     QRect screen;
+    QVector <ShipItem*> shipList;
+    quint16 shipCounter;
 
     void createGui();
 

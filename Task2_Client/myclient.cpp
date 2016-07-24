@@ -15,9 +15,6 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
     this, SLOT(slotError(QAbstractSocket::SocketError))
     );*/
     createGui();
-    //txt->append("client created");
-    QTextEdit *ae = (QTextEdit*)txtStack->widget(0);
-    ae->append("ye");
 }
 
 void MyClient::createGui(){
@@ -146,16 +143,57 @@ void MyClient::slotReadyRead()
             break;
         }
 
-        QString str;
-        in >> str;
-        qDebug()<<str;
+        quint16 isNew, inputStartX, inputStartY;;
+
+        in >> isNew;
+        if(isNew){
+            ShipItem *ship = new ShipItem;
+            shipList.append(ship);
+            shipCounter++;
+            in >> inputStartX >> inputStartY;
+            //считать стартХ и стартУ и курс поместить созданный корабль на сцену по стартовым координатам
+        }
+
+        quint16 inputID;
+        in >> inputID;
+
+        shipList.at(inputID)->id = inputID;
+
+        in >> shipList.at(inputID)->courceAngle
+           >> shipList.at(inputID)->speed
+           >> shipList.at(inputID)->viewAngle
+           >> shipList.at(inputID)->viewLength;
+        //time and path
+
+
         //txt->append("new data: " + str);
+        if(shipCounter){
+            QTextEdit *txt = new QTextEdit;
+            txt->setReadOnly(true);
+            txt->append("New Ship Created");
+            txtStack->addWidget(txt);
+        }
+        QTextEdit *te = (QTextEdit*)txtStack->widget(inputID);
+        te->append(QString("Id: %1").arg(shipList.at(inputID)->id));
+
+        if(isNew){
+            te->append(QString("Start X: %1\nStart Y: %2")
+                       .arg(inputStartX)
+                       .arg(inputStartY));
+        }
+
+        te->append(QString("Cource angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
+                       .arg(shipList.at(inputID)->courceAngle)
+                       .arg(shipList.at(inputID)->speed).arg(shipList.at(inputID)->viewAngle)
+                       .arg(shipList.at(inputID)->viewLength).arg("later").arg("later"));
+
         nextBlockSize = 0;
     }
 }
 
 void MyClient::slotConnected()
 {
+    qDebug()<<"nnice connct";
    // txt->append("Received the connected() signal");
 }
 
