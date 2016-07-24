@@ -10,11 +10,6 @@ class ShipItem : public QGraphicsItem
 {
 public:
     ShipItem();
-
-protected:
-    void advance(int phase);
-
-private:
     quint16 id;
     qreal courceAngle;
     quint16 speed;
@@ -23,6 +18,13 @@ private:
     QTime time; //use start and elapsed
     qreal pathLength;
 
+    QRectF boundingRect() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+protected:
+    void advance(int phase);
+
+//private:
 
 };
 
