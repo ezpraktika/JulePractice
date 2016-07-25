@@ -9,7 +9,7 @@ ShipItem::ShipItem()
 QRectF ShipItem::boundingRect() const
 {
     float edge = viewLength * qTan(qDegreesToRadians(viewAngle/2));
-    return QRectF(-35,-(qMax(5.0f,edge)+5),50+viewLength,qMax(10.0f,2*edge)+10); // -35 -> -50
+    return QRectF(-35,-(qMax(5.0f,edge)+5),50+viewLength,qMax(10.0f,2*edge)+10); // -35 -> -50, 50 -> 65
 
 }
 
@@ -34,13 +34,7 @@ void ShipItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->setBrush(Qt::NoBrush);
 
 
-   // painter->drawRect(boundingRect());
-
-
-
-    /*
-     * if (isViewAvailable){ draw another polygon }
-     */
+    painter->drawRect(boundingRect());
 
 }
 

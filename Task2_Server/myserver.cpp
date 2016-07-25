@@ -167,7 +167,7 @@ void MyServer::sendAllData(){
 
         out.device()->seek(0);
         out<<quint16(block.size()-sizeof(quint16)); //размер блока данных
-        //socket->write(block);   //посылка
+        socket->write(block);   //посылка
         block.clear();          //очистка используемого блока
 
 
@@ -211,7 +211,7 @@ void MyServer::generateData(ShipItemStruct *ship){
         qreal helpY=ship->startY + qSin(qDegreesToRadians(ship->courseAngle))*ship->speed;
 
         //если координаты близко к краям сцены
-        if((helpX > (screen.width()*PERCENT_OF_SCREEN - 20))||(helpX<0)||(helpY>(screen.height()*PERCENT_OF_SCREEN-20))||(helpY<0)){
+        if((helpX > (screen.width()*PERCENT_OF_SCREEN - 20))||(helpX<20)||(helpY>(screen.height()*PERCENT_OF_SCREEN-20))||(helpY<20)){
 
             if (!ship->turnAlreadyStarted){ //если разворот еще не начался
 
