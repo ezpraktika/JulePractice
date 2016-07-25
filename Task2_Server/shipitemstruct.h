@@ -4,6 +4,9 @@
 #include <QTime>
 
 struct ShipItemStruct{
+    bool alreadyFixed = false;
+    qint16 deltaCount;
+    qreal delta;
 
     quint16 isNew;
     qreal startX;

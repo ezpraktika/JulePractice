@@ -9,7 +9,7 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0)
         server->close();
         return;
     }
-
+    qsrand(QTime::currentTime().msec());
     screen = QApplication::desktop()->screenGeometry();
 
     connect(server, SIGNAL(newConnection()), this, SLOT(slotNewConnection()));
@@ -86,7 +86,7 @@ void MyServer::slotNewShip(){
     if(!shipCounter){
         QTextEdit *txt = (QTextEdit*) txtStack->widget(0);
         txt->append("New Ship Created");
-        timer->start(100); // TIMER
+        timer->start(200); // TIMER
     }
     else{
         QTextEdit *txt = new QTextEdit;
@@ -153,7 +153,7 @@ void MyServer::generateData(ShipItemStruct *ship){
         ship->id=shipCounter-1; //WARNIGNEINGEINGEINGE
         ship->startX=100;
         ship->startY=100;
-        ship->courseAngle=90.0f; //SET ROTATION РАБОТАЕТ В ГРАДУСАХ
+        ship->courseAngle=0.0f; //SET ROTATION РАБОТАЕТ В ГРАДУСАХ
         qDebug()<<"hello 0" <<ship->courseAngle;
         ship->isNew = 1;
         ship->viewAngle = 35.0f;  //не забыть стартовать время и офать isNEW
@@ -161,7 +161,55 @@ void MyServer::generateData(ShipItemStruct *ship){
         ship->speed=20;
     }
     else{
-        ship->courseAngle+=-5.0f; //здесь генерация
+
+        qreal helpX=ship->startX + qCos(qDegreesToRadians(ship->courseAngle))*ship->speed;
+        qreal helpY=ship->startY + qSin(qDegreesToRadians(ship->courseAngle))*ship->speed;
+
+        if((helpX > (screen.width()*PERCENT_OF_SCREEN - 20))||(helpX<0)||(helpY>(screen.height()*PERCENT_OF_SCREEN-20))||(helpY<0)){
+            if (!ship->alreadyFixed){
+                if(qrand()%2) ship->delta=10.0f;
+                else ship->delta=-10.0f;
+                ship->alreadyFixed=true;
+            }
+            ship->courseAngle+=ship->delta;
+            //ship->deltaCount++;
+
+            if(ship->courseAngle>180.0f) ship->courseAngle=-180.0f;
+            if(ship->courseAngle<-180.0f) ship->courseAngle=+180.0f;
+
+        }
+        else {ship->alreadyFixed = false;}
+        //ship->courseAngle+=-5.0f; //здесь генерация
+        /*if(ship->deltaCount > 4){
+            switch(qrand()%3){
+            case 0:
+                ship->deltaCount=-5;
+                ship->delta = 10.0f;
+                break;
+            case 1:
+                ship->deltaCount=-5;
+                ship->delta = -10.0f;
+                break;
+            case 2:
+                ship->deltaCount=0;
+                ship->delta = 0.0f;
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            }
+        }
+*/
+        ship->startX += qCos(qDegreesToRadians(ship->courseAngle))*ship->speed;
+        ship->startY += qSin(qDegreesToRadians(ship->courseAngle))*ship->speed;
+       /* ship->courseAngle+=ship->delta;
+        ship->deltaCount++;
+
+        if(ship->courseAngle>180.0f) ship->courseAngle=180.0f;
+        if(ship->courseAngle<-180.0f) ship->courseAngle=-180.0f;*/
+
+
     }
 
 
