@@ -86,7 +86,7 @@ void MyServer::slotNewShip(){
     if(!shipCounter){
         QTextEdit *txt = (QTextEdit*) txtStack->widget(0);
         txt->append("New Ship Created");
-        timer->start(200); // TIMER
+        timer->start(100); // TIMER
     }
     else{
         QTextEdit *txt = new QTextEdit;
@@ -128,7 +128,7 @@ void MyServer::sendAllData(){
 
 
         QTextEdit *te = (QTextEdit*)txtStack->widget(i);
-        te->append(QString("Id: %1").arg(shipList.at(i)->id));
+        te->append(QString("Id: %1").arg(shipList.at(i)->id+1));
 
         if(shipList.at(i)->isNew){
             te->append(QString("Start X: %1\nStart Y: %2")
@@ -148,70 +148,79 @@ void MyServer::sendAllData(){
 
 void MyServer::generateData(ShipItemStruct *ship){
 
+    //если новый корабль, то задаются стартовые параметры
     if(ship->isNew==1){
-
         ship->id=shipCounter-1; //WARNIGNEINGEINGEINGE
         ship->startX=100;
         ship->startY=100;
         ship->courseAngle=0.0f; //SET ROTATION РАБОТАЕТ В ГРАДУСАХ
-        qDebug()<<"hello 0" <<ship->courseAngle;
         ship->isNew = 1;
         ship->viewAngle = 35.0f;  //не забыть стартовать время и офать isNEW
-        ship->viewLength = 100;       //убрать из структуры время хотя надо переводить же етпаааиа
+        ship->viewLength = 100;   //таймер и счетчик пути!!
         ship->speed=20;
     }
+    //если корабль существовал прежде
     else{
 
+        //высчитываем следующие координаты при текущем курсе
         qreal helpX=ship->startX + qCos(qDegreesToRadians(ship->courseAngle))*ship->speed;
         qreal helpY=ship->startY + qSin(qDegreesToRadians(ship->courseAngle))*ship->speed;
 
+        //если координаты близко к краям сцены
         if((helpX > (screen.width()*PERCENT_OF_SCREEN - 20))||(helpX<0)||(helpY>(screen.height()*PERCENT_OF_SCREEN-20))||(helpY<0)){
-            if (!ship->alreadyFixed){
-                if(qrand()%2) ship->delta=10.0f;
-                else ship->delta=-10.0f;
-                ship->alreadyFixed=true;
-            }
-            ship->courseAngle+=ship->delta;
-            //ship->deltaCount++;
 
-            if(ship->courseAngle>180.0f) ship->courseAngle=-180.0f;
-            if(ship->courseAngle<-180.0f) ship->courseAngle=+180.0f;
+            if (!ship->turnAlreadyStarted){ //если разворот еще не начался
 
-        }
-        else {ship->alreadyFixed = false;}
-        //ship->courseAngle+=-5.0f; //здесь генерация
-        /*if(ship->deltaCount > 4){
-            switch(qrand()%3){
-            case 0:
-                ship->deltaCount=-5;
-                ship->delta = 10.0f;
-                break;
-            case 1:
-                ship->deltaCount=-5;
-                ship->delta = -10.0f;
-                break;
-            case 2:
-                ship->deltaCount=0;
-                ship->delta = 0.0f;
-                break;
-            case 3:
-                break;
-            case 4:
-                break;
+                if(qrand()%2) {         //то начинаем поворот в случайную сторону
+                    ship->delta=10.0f;
+                }
+                else {
+                    ship->delta=-10.0f;
+                }
+                ship->turnAlreadyStarted=true;
             }
         }
-*/
-        ship->startX += qCos(qDegreesToRadians(ship->courseAngle))*ship->speed;
-        ship->startY += qSin(qDegreesToRadians(ship->courseAngle))*ship->speed;
-       /* ship->courseAngle+=ship->delta;
-        ship->deltaCount++;
+        //если координаты не приближаются к краям
+        else {
+            ship->turnAlreadyStarted = false;
 
-        if(ship->courseAngle>180.0f) ship->courseAngle=180.0f;
-        if(ship->courseAngle<-180.0f) ship->courseAngle=-180.0f;*/
+            //если предыдущий маневр завершился
+            if(ship->deltaCount<0){
 
+                 //генерация случайного маневра
+                switch(qrand()%5){
 
+                //поворот по часовой
+                case 0:
+                    ship->deltaCount=qrand()%6+5;
+                    ship->delta = 10.0f;
+                    break;
+
+                //поворот против часовой
+                case 1:
+                    ship->deltaCount=qrand()%6+5;
+                    ship->delta = -10.0f;
+                    break;
+
+                //движение по прямой
+                case 2:
+                case 3:
+                case 4:
+                    ship->deltaCount=qrand()%6+5;
+                    ship->delta = 0.0f;
+                    break;
+               }
+            }
+        }
+
+        ship->courseAngle+=ship->delta; //меняем курс в соответствии с ранее выбранной дельтой
+        ship->deltaCount--;
+
+        if(ship->courseAngle>180.0f) ship->courseAngle=-180.0f;  //чтобы полный круг был
+        if(ship->courseAngle<-180.0f) ship->courseAngle=+180.0f; //
+
+        ship->startX += qCos(qDegreesToRadians(ship->courseAngle))*ship->speed; //пересчитываем координаты
+        ship->startY += qSin(qDegreesToRadians(ship->courseAngle))*ship->speed; //
     }
-
-
 }
 

@@ -4,7 +4,7 @@
 #include <QTime>
 
 struct ShipItemStruct{
-    bool alreadyFixed = false;
+    bool turnAlreadyStarted = false;
     qint16 deltaCount;
     qreal delta;
 
