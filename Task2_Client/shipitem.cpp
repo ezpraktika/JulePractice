@@ -1,6 +1,5 @@
 #include "shipitem.h"
-#include <QtDebug>
-#include <QtMath>
+
 ShipItem::ShipItem()
 {
     shipSize = 1;

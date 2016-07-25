@@ -5,6 +5,8 @@
 #include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QTime>
+#include <QtDebug>
+#include <QtMath>
 
 class ShipItem : public QGraphicsItem
 {

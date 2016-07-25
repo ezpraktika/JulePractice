@@ -1,6 +1,7 @@
 #ifndef MYSERVER_H
 #define MYSERVER_H
 
+#include <QtGui>
 #include <QWidget>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -18,7 +19,7 @@
 #include <QTimer>
 #include <QVector>
 #include <QtMath>
-//#include <QtDebug>
+
 
 #include "shipitemstruct.h"
 
@@ -36,6 +37,11 @@ private:
     QTcpSocket *socket;
     QVector <ShipItemStruct*> shipList;
     quint16 shipCounter;
+
+    QPushButton *prevButton;
+    QLabel *logNumber;
+    QPushButton *nextButton;
+
     //лист txt сделать
     void createGui();
     void generateData(ShipItemStruct *ship);
@@ -50,6 +56,8 @@ public slots:
     void slotNewConnection();
     void sendAllData();
     void slotNewShip();
+    void slotNextButton();
+    void slotPrevButton();
 };
 
 #endif // MYSERVER_H

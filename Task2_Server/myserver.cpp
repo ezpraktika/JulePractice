@@ -23,15 +23,17 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0)
 
 void MyServer::createGui(){
 
-    QPushButton *prevButton = new QPushButton("<<");
+    prevButton = new QPushButton("<<");
     prevButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     prevButton->setEnabled(false);
+    connect(prevButton, SIGNAL(clicked(bool)),this,SLOT(slotPrevButton()));
 
-    QPushButton *nextButton = new QPushButton(">>");
+    nextButton = new QPushButton(">>");
     nextButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     nextButton->setEnabled(false);
+    connect(nextButton,SIGNAL(clicked(bool)),this,SLOT(slotNextButton()));
 
-    QLabel *logNumber = new QLabel("1");
+    logNumber = new QLabel("1");
     logNumber->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     QHBoxLayout *logButtonsLayout = new QHBoxLayout;
@@ -85,17 +87,57 @@ void MyServer::slotNewShip(){
 
     if(!shipCounter){
         QTextEdit *txt = (QTextEdit*) txtStack->widget(0);
-        txt->append("New Ship Created");
-        timer->start(100); // TIMER
+        txt->append("Ship created");
+        //shipCounter++;
+        timer->start(2500); // TIMER
     }
     else{
         QTextEdit *txt = new QTextEdit;
         txt->setReadOnly(true);
         txt->append("New Ship Created");
         txtStack->addWidget(txt);
+        nextButton->setEnabled(true);
+        //shipCounter++;
+        //slotNextButton();
     }
-
     shipCounter++;
+}
+
+void MyServer::slotNextButton()
+{
+    //считываем номер текущей страницы
+    int num = logNumber->text().toInt();
+
+    //если это первая страница, то включаем кнопку "<<"
+    if (num == 1) prevButton->setEnabled(true);
+
+    //стек выбирает следующий textEdit для показа
+    txtStack->setCurrentIndex(num);
+
+    //новый номер страницы
+    logNumber->setText(QString::number(++num));
+
+    //если это последняя страница, отключаем кнопку ">>"
+    if(num == shipCounter) nextButton->setEnabled(false);
+
+}
+
+void MyServer::slotPrevButton()
+{
+    //считываем номер текущей страницы
+    int num = logNumber->text().toInt();
+
+    //если это последняя страница, то включаем кнопку ">>"
+    if (num == shipCounter) nextButton->setEnabled(true);
+
+    //стек выбирает предыдущий textEdit для показа
+    txtStack->setCurrentIndex(num-2);
+
+    //новый номер страницы
+    logNumber->setText(QString::number(--num));
+
+    //если это первая страница, отключаем кнопку "<<"
+    if(num == 1) prevButton->setEnabled(false);
 }
 
 
@@ -105,12 +147,14 @@ void MyServer::sendAllData(){
     QDataStream out (&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
 
+    //для всех кораблей
     for(int i=0; i < shipCounter; i++){
 
-        generateData(shipList.at(i));
+        generateData(shipList.at(i));   //генерируем новые данные
 
         out<<quint16(0) << shipList.at(i)->id << shipList.at(i)->isNew;
 
+        //если корабль новый, то записываем стартовые координаты
         if(shipList.at(i)->isNew){
             out << shipList.at(i)->startX << shipList.at(i)->startY;
         }
@@ -122,13 +166,13 @@ void MyServer::sendAllData(){
         //time and path
 
         out.device()->seek(0);
-        out<<quint16(block.size()-sizeof(quint16));
-        socket->write(block);
-        block.clear();
+        out<<quint16(block.size()-sizeof(quint16)); //размер блока данных
+        //socket->write(block);   //посылка
+        block.clear();          //очистка используемого блока
 
 
-        QTextEdit *te = (QTextEdit*)txtStack->widget(i);
-        te->append(QString("Id: %1").arg(shipList.at(i)->id+1));
+        QTextEdit *te = (QTextEdit*)txtStack->widget(i);        //получение указателя на лог текущего корабля
+        te->append(QString("Id: %1").arg(shipList.at(i)->id+1));//вывод сгенерированной информации в лог
 
         if(shipList.at(i)->isNew){
             te->append(QString("Start X: %1\nStart Y: %2")

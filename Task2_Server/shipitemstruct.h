@@ -4,7 +4,7 @@
 #include <QTime>
 
 struct ShipItemStruct{
-    bool turnAlreadyStarted = false;
+    bool turnAlreadyStarted;
     qint16 deltaCount;
     qreal delta;
 
@@ -19,6 +19,10 @@ struct ShipItemStruct{
     quint16 viewLength;
     QTime time;
     qreal pathLength;
+
+    ShipItemStruct(){
+        turnAlreadyStarted=false;
+    }
 };
 
 #endif // SHIPITEMSTRUCT
