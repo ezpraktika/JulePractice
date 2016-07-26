@@ -36,38 +36,37 @@ public:
     ~MyClient();
 
 private:
-    QRect screen;
+    QRect screen; //экран (для получения размеров)
 
     QString host;
     int port;
     QTcpSocket *socket;
-    quint16 nextBlockSize;
+    quint16 nextBlockSize;  //размер блока получаемых данных
 
-    QStackedWidget *txtStack;
+    QStackedWidget *txtStack;   //стек логов кораблей
     QPushButton *prevButton;
     QLabel *logNumber;
     QPushButton *nextButton;
 
-    QGraphicsScene *scene;
+    QGraphicsScene *scene;  //сцена (карта)
 
-    QVector <ShipItem*> shipList;
-    quint16 shipCounter;
+    QVector <ShipItem*> shipList;   //вектор кораблей
+    quint16 shipCounter;            //количество кораблей
 
-    QTimer* timer;
 
-    void createGui();
+    void createGui();   //создание интерфейса
 
 private slots:
-    void slotConnected();
-    void slotReadyRead();
-    void slotError(QAbstractSocket::SocketError err);
+    void slotConnected();   //соединение установлено
+    void slotReadyRead();   //получение данных
+    void slotError(QAbstractSocket::SocketError err);   //сообщения об ошибках
 
-    void slotReactToToggleViewCheckBox(bool checked);
-    void slotShipResize(int);\
+    void slotReactToToggleViewCheckBox(bool checked);   //вкл/выкл область видимости
+    void slotShipResize(int); //изменение размеров корабля
 
-    void slotConnectButton();
-    void slotNextButton();
-    void slotPrevButton();
+    void slotConnectButton();   //подключение к серверу
+    void slotNextButton();      //следующий лог
+    void slotPrevButton();      //предыдущий лог
 };
 
 #endif // MYCLIENT_H

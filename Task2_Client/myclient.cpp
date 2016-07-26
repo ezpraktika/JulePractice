@@ -12,6 +12,7 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
     createGui();
 }
 
+//генерация интерфейса
 void MyClient::createGui(){
 
     //панель отрисовки
@@ -222,14 +223,15 @@ void MyClient::slotReadyRead()
 
 }
 
+//вкл/выкл область видимости
 void MyClient::slotReactToToggleViewCheckBox(bool checked)
 {
-   /* showView = checked;*/
-    //как то передавать сцене?
+
     ShipItem* a = (ShipItem*)scene->items().at(0);
     a->isViewVisible = checked;
 }
 
+//подключиться к серверу
 void MyClient::slotConnectButton(){
     socket=new QTcpSocket(this);
     socket->connectToHost(host,port);
@@ -239,12 +241,15 @@ void MyClient::slotConnectButton(){
     connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
 }
 
+//соединение установлено
 void MyClient::slotConnected()
 {
     qDebug()<<"nnice connct";
    // txt->append("Received the connected() signal");
 }
 
+
+//сообщения об ошибках
 void MyClient::slotError(QAbstractSocket::SocketError err)
 {
 
@@ -268,11 +273,14 @@ void MyClient::slotError(QAbstractSocket::SocketError err)
     qDebug()<<strError;
 }
 
+
+//изменение размеров корабля
 void MyClient::slotShipResize(int val){
     ShipItem* a = (ShipItem*)scene->items().at(0);
     a->shipSize = val;
 }
 
+//следующий лог
 void MyClient::slotNextButton()
 {
     //считываем номер текущей страницы
@@ -291,6 +299,7 @@ void MyClient::slotNextButton()
     if(num == shipCounter) nextButton->setEnabled(false);
 }
 
+//предыдущий лог
 void MyClient::slotPrevButton()
 {
     //считываем номер текущей страницы

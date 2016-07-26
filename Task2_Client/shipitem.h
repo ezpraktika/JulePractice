@@ -12,25 +12,25 @@ class ShipItem : public QGraphicsItem
 {
 public:
     ShipItem();
-    quint16 id;
-    qreal courseAngle;
-    quint16 speed;
-    qreal viewAngle;
-    quint16 viewLength;
-    QTime time; //use start and elapsed
-    qreal pathLength;
 
-//gui---
-    quint16 shipSize;
-    bool isViewVisible;
-//-----
+    quint16 id;         //индекс
+    qreal courseAngle;  //курс
+    quint16 speed;      //скорость
+    qreal viewAngle;    //угол обзора
+    quint16 viewLength; //длина обзора
+    QTime time;         //время существования use start and elapsed
+    qreal pathLength;   //пройденный путь
 
-    quint16 isNew;
-    qreal startX;
-    qreal startY;
 
-    qreal prevX;
-    qreal prevY;
+    quint16 shipSize;   //размер корабля
+    bool isViewVisible; //вкл/выкл область видимости
+
+    quint16 isNew;  //новый корабль или нет
+    qreal startX;   //координаты на текущем этапе
+    qreal startY;   //
+
+    qreal prevX;    //координаты на предыдущем этапе
+    qreal prevY;    //
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -38,7 +38,6 @@ public:
 protected:
     void advance(int phase);
 
-//private:
 
 };
 

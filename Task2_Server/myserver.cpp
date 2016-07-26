@@ -1,7 +1,7 @@
 #include "myserver.h"
 #include "shipitemstruct.h"
 
-MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0)
+MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0), shipIndexCounter(0)
 {
     server = new QTcpServer(this);
     if(!server->listen(QHostAddress::Any , port)){
@@ -9,6 +9,7 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0)
         server->close();
         return;
     }
+
     qsrand(QTime::currentTime().msec());
     screen = QApplication::desktop()->screenGeometry();
 
@@ -21,8 +22,10 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0)
 
 }
 
+//создание интерфейса
 void MyServer::createGui(){
 
+    //панель управления логом
     prevButton = new QPushButton("<<");
     prevButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     prevButton->setEnabled(false);
@@ -43,7 +46,7 @@ void MyServer::createGui(){
     logButtonsLayout->insertStretch(-1);
     logButtonsLayout->addWidget(nextButton);
 
-
+    //лог
     txtStack = new QStackedWidget;
     txtStack->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Expanding);
     txtStack->setFixedSize(screen.width()*PERCENT_OF_SCREEN*PERCENT_OF_SCREEN*0.7f, screen.height()*PERCENT_OF_SCREEN*0.7f);
@@ -51,20 +54,23 @@ void MyServer::createGui(){
     txt->setReadOnly(true);
     txtStack->addWidget(txt);
 
-
+    //левая панель сервера (лог и кнопки)
     QVBoxLayout *leftPanelLayout = new QVBoxLayout();
     leftPanelLayout->addWidget(txtStack);
     leftPanelLayout->addLayout(logButtonsLayout);
 
-
+    //правая панель (кнопки создания и удаления кораблей)
     QPushButton *createShipButton = new QPushButton ("Добавить корабль");
     connect(createShipButton,SIGNAL(clicked()),this,SLOT(slotNewShip()));
-    QPushButton *deleteShipButton = new QPushButton ("Удалить корабль");
+    deleteShipButton = new QPushButton ("Удалить корабль");
+    deleteShipButton->setEnabled(false);
+    connect(deleteShipButton,SIGNAL(clicked(bool)),this,SLOT(slotDeleteShip()));
 
     QVBoxLayout *rightPanelLayout = new QVBoxLayout;
     rightPanelLayout->addWidget(createShipButton);
     rightPanelLayout->addWidget(deleteShipButton);
     rightPanelLayout->insertStretch(-1);
+
 
     QHBoxLayout *mainPanelLayout = new QHBoxLayout;
     mainPanelLayout->addLayout(leftPanelLayout);
@@ -74,27 +80,37 @@ void MyServer::createGui(){
     setFixedSize(sizeHint().width(),sizeHint().height());
 }
 
+//слот - новое подключение
 void MyServer::slotNewConnection(){
     socket = server->nextPendingConnection();
     connect(socket,SIGNAL(disconnected()),socket,SLOT(deleteLater()));
 }
 
+//слот - создание нового корабля
 void MyServer::slotNewShip(){
 
+    //создание корабля
     ShipItemStruct* ship = new ShipItemStruct;
     ship->isNew=1;
     shipList.append(ship);
 
+    //если это первый корабль
     if(!shipCounter){
         QTextEdit *txt = (QTextEdit*) txtStack->widget(0);
         txt->append("Ship created");
+
+        deleteShipButton->setEnabled(true);
+
         //shipCounter++;
-        timer->start(300); // TIMER
+        timer->start(3500); // TIMER
     }
+    //если не первый корабль
     else{
+        //создаем новый лог
         QTextEdit *txt = new QTextEdit;
         txt->setReadOnly(true);
         txt->append("New Ship Created");
+
         txtStack->addWidget(txt);
         nextButton->setEnabled(true);
         //shipCounter++;
@@ -103,6 +119,59 @@ void MyServer::slotNewShip(){
     shipCounter++;
 }
 
+//слот - удаление корабля
+void MyServer::slotDeleteShip(){
+
+    //считываем номер текущей страницы
+    //(номер удаляемого корабля)
+    int num = logNumber->text().toInt();
+
+    //получаем адрес лога удаляемого корабля
+    QTextEdit *txt = (QTextEdit*) txtStack->widget(num-1);
+
+    //удаляем корабль из вектора
+    shipList.remove(num-1);
+
+    shipCounter--;
+
+    //если это был последний корабль
+    if(shipCounter==0){
+        txt->clear();                           //очищаем лог
+        deleteShipButton->setEnabled(false);    //отключаем кнопку удаления
+    }
+    //иначе
+    else{
+
+        txtStack->removeWidget(txt);  //удаляем лог
+
+        if(num > shipCounter){                            //если номер лога больше количества кораблей
+            logNumber->setText(QString::number(num-1));   //обновляем номер
+            txtStack->setCurrentIndex(num-2);
+        }
+        else{
+            txtStack->setCurrentIndex(num-1);
+        }
+
+        delete txt;
+    }
+
+    //если в итоге оказались на первом логе
+    if(!txtStack->currentIndex()){
+        prevButton->setEnabled(false);
+    }
+
+    //если в итоге оказались на последнем логе
+    if((txtStack->currentIndex()+1)==shipCounter){
+        nextButton->setEnabled(false);
+    }
+
+    qDebug()<<"ship counter after delete: "<<shipCounter;
+    qDebug()<<"shipList size: "<<shipList.size();
+    qDebug()<<"stack widget size: " <<txtStack->size();
+
+}
+
+//слот - переход к логу следующего корабля
 void MyServer::slotNextButton()
 {
     //считываем номер текущей страницы
@@ -122,6 +191,7 @@ void MyServer::slotNextButton()
 
 }
 
+//слот - переход к логу предыдущего корабля
 void MyServer::slotPrevButton()
 {
     //считываем номер текущей страницы
@@ -140,7 +210,7 @@ void MyServer::slotPrevButton()
     if(num == 1) prevButton->setEnabled(false);
 }
 
-
+//отправление данных по всем кораблям
 void MyServer::sendAllData(){
 
     QByteArray block;
@@ -184,18 +254,19 @@ void MyServer::sendAllData(){
         shipList.at(i)->isNew=0;
     }
 
-    out.device()->seek(0);
+    out.device()->seek(0);  //переход в начало блока
     out<<quint16(block.size()-sizeof(quint16)); //размер блока данных
-    socket->write(block);   //посылка
+    //socket->write(block);   //посылка
     block.clear();          //очистка используемого блока
 
 }
 
+//генерация новых данных для корабля
 void MyServer::generateData(ShipItemStruct *ship){
 
     //если новый корабль, то задаются стартовые параметры
     if(ship->isNew==1){
-        ship->id=shipCounter-1; //WARNIGNEINGEINGEINGE
+        ship->id=shipIndexCounter; //WARNIGNEINGEINGEINGE
         ship->startX=100;
         ship->startY=100;
         ship->courseAngle=0.0f; //SET ROTATION РАБОТАЕТ В ГРАДУСАХ
@@ -203,6 +274,8 @@ void MyServer::generateData(ShipItemStruct *ship){
         ship->viewAngle = 35.0f;  //не забыть стартовать время и офать isNEW
         ship->viewLength = 100;   //таймер и счетчик пути!!
         ship->speed=20;
+
+        shipIndexCounter++;
     }
     //если корабль существовал прежде
     else{

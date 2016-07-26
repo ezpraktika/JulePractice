@@ -29,24 +29,26 @@ class MyServer : public QWidget
     Q_OBJECT
 
 private:
-    QRect screen;
+    QRect screen;   //экран (для получения размеров)
 
     QTcpServer *server;
     QTcpSocket *socket;
 
-    QStackedWidget *txtStack;
+    QStackedWidget *txtStack;   //стек для логов кораблей
     QPushButton *prevButton;
     QLabel *logNumber;
     QPushButton *nextButton;
 
+    QPushButton *deleteShipButton;
+
     QTimer *timer;
 
-    QVector <ShipItemStruct*> shipList;
-    quint16 shipCounter;
+    QVector <ShipItemStruct*> shipList; //вектор указателей на корабли
+    quint16 shipCounter;        //количество кораблей
+    quint16 shipIndexCounter;   //для неповторяющейся индексации кораблей
 
-    //лист txt сделать
-    void createGui();
-    void generateData(ShipItemStruct *ship);
+    void createGui();                           //создание интерфейса
+    void generateData(ShipItemStruct *ship);    //генерация данных
 
 public:
     explicit MyServer(int port, QWidget *parent = 0);
@@ -54,11 +56,12 @@ public:
 signals:
 
 public slots:
-    void slotNewConnection();
-    void sendAllData();
-    void slotNewShip();
-    void slotNextButton();
-    void slotPrevButton();
+    void slotNewConnection();   //новое соединение
+    void sendAllData();         //отправка данных по всем кораблям
+    void slotNewShip();         //создание корабля
+    void slotDeleteShip();      //удаление корабля
+    void slotNextButton();      //следующий лог
+    void slotPrevButton();      //предыдущий лог
 };
 
 #endif // MYSERVER_H
