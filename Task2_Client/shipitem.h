@@ -4,9 +4,9 @@
 #include <QPainter>
 #include <QGraphicsItem>
 #include <QGraphicsScene>
-#include <QTime>
 #include <QtDebug>
 #include <QtMath>
+#include <QTime>
 
 class ShipItem : public QGraphicsItem
 {
@@ -18,7 +18,7 @@ public:
     quint16 speed;      //скорость
     qreal viewAngle;    //угол обзора
     quint16 viewLength; //длина обзора
-    QTime time;         //время существования use start and elapsed
+    int time;           //время существования (мс)
     qreal pathLength;   //пройденный путь
 
 

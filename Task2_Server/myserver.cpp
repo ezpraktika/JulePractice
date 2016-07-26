@@ -102,7 +102,7 @@ void MyServer::slotNewShip(){
         deleteShipButton->setEnabled(true);
 
         //shipCounter++;
-        timer->start(3500); // TIMER
+        timer->start(400); // TIMER
     }
     //если не первый корабль
     else{
@@ -233,8 +233,10 @@ void MyServer::sendAllData(){
         out << shipList.at(i)->courseAngle
             << shipList.at(i)->speed
             << shipList.at(i)->viewAngle
-            << shipList.at(i)->viewLength;
-        //time and path
+            << shipList.at(i)->viewLength
+            << shipList.at(i)->pathLength
+            << shipList.at(i)->time;
+
 
 
         QTextEdit *te = (QTextEdit*)txtStack->widget(i);        //получение указателя на лог текущего корабля
@@ -249,14 +251,14 @@ void MyServer::sendAllData(){
         te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
                        .arg(shipList.at(i)->courseAngle)
                        .arg(shipList.at(i)->speed).arg(shipList.at(i)->viewAngle)
-                       .arg(shipList.at(i)->viewLength).arg("later").arg("later"));
+                       .arg(shipList.at(i)->viewLength).arg(shipList.at(i)->pathLength).arg(shipList.at(i)->time));
 
         shipList.at(i)->isNew=0;
     }
 
     out.device()->seek(0);  //переход в начало блока
     out<<quint16(block.size()-sizeof(quint16)); //размер блока данных
-    //socket->write(block);   //посылка
+    socket->write(block);   //посылка
     block.clear();          //очистка используемого блока
 
 }
@@ -266,14 +268,19 @@ void MyServer::generateData(ShipItemStruct *ship){
 
     //если новый корабль, то задаются стартовые параметры
     if(ship->isNew==1){
-        ship->id=shipIndexCounter; //WARNIGNEINGEINGEINGE
         ship->startX=100;
         ship->startY=100;
+        ship->id=shipIndexCounter;
         ship->courseAngle=0.0f; //SET ROTATION РАБОТАЕТ В ГРАДУСАХ
-        ship->isNew = 1;
-        ship->viewAngle = 35.0f;  //не забыть стартовать время и офать isNEW
-        ship->viewLength = 100;   //таймер и счетчик пути!!
         ship->speed=20;
+        ship->viewAngle = 35.0f;  //не забыть стартовать время и офать isNEW
+        ship->viewLength = 100;
+        ship->timer.start();
+        ship->time=0;
+        ship->pathLength=0;
+
+        ship->delta=0.0f;
+        ship->deltaCount=-1;
 
         shipIndexCounter++;
     }
@@ -295,6 +302,7 @@ void MyServer::generateData(ShipItemStruct *ship){
                 else {
                     ship->delta=-30.0f;
                 }
+                ship->deltaCount=-1;
                 ship->turnAlreadyStarted=true;
             }
         }
@@ -310,13 +318,13 @@ void MyServer::generateData(ShipItemStruct *ship){
 
                 //поворот по часовой
                 case 0:
-                    ship->deltaCount=qrand()%6+5;
+                    ship->deltaCount=qrand()%4+2;
                     ship->delta = 10.0f;
                     break;
 
                 //поворот против часовой
                 case 1:
-                    ship->deltaCount=qrand()%6+5;
+                    ship->deltaCount=qrand()%4+2;
                     ship->delta = -10.0f;
                     break;
 
@@ -324,21 +332,28 @@ void MyServer::generateData(ShipItemStruct *ship){
                 case 2:
                 case 3:
                 case 4:
-                    ship->deltaCount=qrand()%6+5;
+                    ship->deltaCount=qrand()%4+2;
                     ship->delta = 0.0f;
                     break;
                }
             }
         }
-
+        qDebug()<<"course before delta "<<ship->courseAngle;
         ship->courseAngle+=ship->delta; //меняем курс в соответствии с ранее выбранной дельтой
         ship->deltaCount--;
-
-        if(ship->courseAngle>180.0f) ship->courseAngle=-180.0f;  //чтобы полный круг был
+        qDebug()<<"course after delta "<<ship->courseAngle;
+        if(ship->courseAngle>180.0f) {
+            qDebug()<<"attention"<<ship->courseAngle;
+            ship->courseAngle=-180.0f;  //чтобы полный круг был
+        }
         if(ship->courseAngle<-180.0f) ship->courseAngle=+180.0f; //
+
+        ship->pathLength += sqrtf((helpX-ship->startX)*(helpX-ship->startX)+(helpY-ship->startY)*(helpY-ship->startY));
 
         ship->startX += qCos(qDegreesToRadians(ship->courseAngle))*ship->speed; //пересчитываем координаты
         ship->startY += qSin(qDegreesToRadians(ship->courseAngle))*ship->speed; //
+
+        ship->time = ship->timer.elapsed();
     }
 }
 

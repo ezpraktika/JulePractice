@@ -139,6 +139,7 @@ void MyClient::createGui(){
 
 void MyClient::slotReadyRead()
 {
+    qDebug()<<"ready read";
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_5_5);
 
@@ -196,10 +197,9 @@ void MyClient::slotReadyRead()
             in >> shipList.at(inputID)->courseAngle
                     >> shipList.at(inputID)->speed
                     >> shipList.at(inputID)->viewAngle
-                    >> shipList.at(inputID)->viewLength;
-            //time and path
-
-
+                    >> shipList.at(inputID)->viewLength
+                    >> shipList.at(inputID)->pathLength
+                    >> shipList.at(inputID)->time;
 
             //получаем указатель на нужный лог и записываем в него все считанные данные
             QTextEdit *te = (QTextEdit*)txtStack->widget(inputID);
@@ -214,7 +214,7 @@ void MyClient::slotReadyRead()
             te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
                        .arg(shipList.at(inputID)->courseAngle)
                        .arg(shipList.at(inputID)->speed).arg(shipList.at(inputID)->viewAngle)
-                       .arg(shipList.at(inputID)->viewLength).arg("later").arg("later"));
+                       .arg(shipList.at(inputID)->viewLength).arg(shipList.at(inputID)->pathLength).arg(shipList.at(inputID)->time));
         }
         //новый блок данных
         nextBlockSize = 0;
