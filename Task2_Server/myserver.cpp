@@ -212,15 +212,15 @@ void MyServer::generateData(ShipItemStruct *ship){
         qreal helpY=ship->startY + qSin(qDegreesToRadians(ship->courseAngle))*ship->speed;
 
         //если координаты близко к краям сцены
-        if((helpX > (screen.width()*PERCENT_OF_SCREEN - 20))||(helpX<20)||(helpY>(screen.height()*PERCENT_OF_SCREEN-20))||(helpY<20)){
+        if((helpX > (screen.width()*PERCENT_OF_SCREEN - 40))||(helpX<40)||(helpY>(screen.height()*PERCENT_OF_SCREEN-40))||(helpY<40)){
 
             if (!ship->turnAlreadyStarted){ //если разворот еще не начался
 
                 if(qrand()%2) {         //то начинаем поворот в случайную сторону
-                    ship->delta=10.0f;
+                    ship->delta=30.0f;
                 }
                 else {
-                    ship->delta=-10.0f;
+                    ship->delta=-30.0f;
                 }
                 ship->turnAlreadyStarted=true;
             }

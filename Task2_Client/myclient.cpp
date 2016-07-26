@@ -6,14 +6,9 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
 {
     screen = QApplication::desktop()->screenGeometry();
 
-    socket=new QTcpSocket(this);
-    socket->connectToHost(host,port);
+    this->host=host;
+    this->port=port;
 
-    connect(socket,SIGNAL(connected()),SLOT(slotConnected()));
-    connect(socket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
-    /*connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
-    this, SLOT(slotError(QAbstractSocket::SocketError))
-    );*/
     createGui();
 }
 
@@ -39,9 +34,13 @@ void MyClient::createGui(){
     scene->addLine(bottomLine,pen);
     scene->addLine(leftLine,pen);
 
+    QRectF turnArea = QRectF(QPointF(40,40),QPointF(screen.width()*PERCENT_OF_SCREEN - 40,screen.height()*PERCENT_OF_SCREEN - 40));
+    scene->addRect(turnArea,pen);
+
     //панель управления отрисовкой
 
     QPushButton *connectButton = new QPushButton("Connect");
+    connect(connectButton,SIGNAL(clicked(bool)),this,SLOT(slotConnectButton()));
 
     QCheckBox *showPathCheckBox = new QCheckBox("Путь");
     QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора");
@@ -163,12 +162,10 @@ void MyClient::slotReadyRead()
         quint16 serverShipCounter, inputIsNew, inputID;
 
         in >> serverShipCounter;
-        qDebug()<<"serv count  " << serverShipCounter;
 
         for(int j = 0;j<serverShipCounter;j++){
             in >> inputID >> inputIsNew;
-            qDebug()<<"id " << inputID;
-            qDebug()<<"isnew " << inputIsNew;
+
             //если данные о новом корабле
             if(inputIsNew){
                 ShipItem *ship = new ShipItem;  //создаем новый корабль
@@ -233,10 +230,42 @@ void MyClient::slotReactToToggleViewCheckBox(bool checked)
     a->isViewVisible = checked;
 }
 
+void MyClient::slotConnectButton(){
+    socket=new QTcpSocket(this);
+    socket->connectToHost(host,port);
+
+    connect(socket,SIGNAL(connected()),SLOT(slotConnected()));
+    connect(socket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
+    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
+}
+
 void MyClient::slotConnected()
 {
     qDebug()<<"nnice connct";
    // txt->append("Received the connected() signal");
+}
+
+void MyClient::slotError(QAbstractSocket::SocketError err)
+{
+
+    QString strError;
+
+    switch(err){
+    case QAbstractSocket::HostNotFoundError:
+        strError = "The host was not found";
+        break;
+    case QAbstractSocket::RemoteHostClosedError:
+        strError = "The remote host is closed";
+        break;
+    case QAbstractSocket::ConnectionRefusedError:
+        strError = "The connection was refused";
+        break;
+    default:
+        strError=QString(socket->errorString());
+        break;
+    }
+
+    qDebug()<<strError;
 }
 
 void MyClient::slotShipResize(int val){

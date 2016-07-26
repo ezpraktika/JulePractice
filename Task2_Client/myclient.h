@@ -38,6 +38,8 @@ public:
 private:
     QRect screen;
 
+    QString host;
+    int port;
     QTcpSocket *socket;
     quint16 nextBlockSize;
 
@@ -58,8 +60,12 @@ private:
 private slots:
     void slotConnected();
     void slotReadyRead();
+    void slotError(QAbstractSocket::SocketError err);
+
     void slotReactToToggleViewCheckBox(bool checked);
-    void slotShipResize(int);
+    void slotShipResize(int);\
+
+    void slotConnectButton();
     void slotNextButton();
     void slotPrevButton();
 };
