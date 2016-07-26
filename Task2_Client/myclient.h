@@ -36,11 +36,18 @@ public:
     ~MyClient();
 
 private:
-    QTcpSocket *socket;
-    QStackedWidget *txtStack;
-    quint16 nextBlockSize;
-    QGraphicsScene *scene;
     QRect screen;
+
+    QTcpSocket *socket;
+    quint16 nextBlockSize;
+
+    QStackedWidget *txtStack;
+    QPushButton *prevButton;
+    QLabel *logNumber;
+    QPushButton *nextButton;
+
+    QGraphicsScene *scene;
+
     QVector <ShipItem*> shipList;
     quint16 shipCounter;
 
@@ -53,6 +60,8 @@ private slots:
     void slotReadyRead();
     void slotReactToToggleViewCheckBox(bool checked);
     void slotShipResize(int);
+    void slotNextButton();
+    void slotPrevButton();
 };
 
 #endif // MYCLIENT_H

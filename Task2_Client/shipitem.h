@@ -20,10 +20,10 @@ public:
     QTime time; //use start and elapsed
     qreal pathLength;
 
-
+//gui---
     quint16 shipSize;
     bool isViewVisible;
-
+//-----
 
     quint16 isNew;
     qreal startX;

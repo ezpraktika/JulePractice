@@ -89,7 +89,7 @@ void MyServer::slotNewShip(){
         QTextEdit *txt = (QTextEdit*) txtStack->widget(0);
         txt->append("Ship created");
         //shipCounter++;
-        timer->start(2500); // TIMER
+        timer->start(300); // TIMER
     }
     else{
         QTextEdit *txt = new QTextEdit;
@@ -146,13 +146,14 @@ void MyServer::sendAllData(){
     QByteArray block;
     QDataStream out (&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
-
+    out<<quint16(0)<<shipCounter;
     //для всех кораблей
     for(int i=0; i < shipCounter; i++){
 
         generateData(shipList.at(i));   //генерируем новые данные
+        qDebug()<<"count: "<< shipCounter<<"\nid "<<shipList.at(i)->id<<"\nisnew "<< shipList.at(i)->isNew;
 
-        out<<quint16(0) << shipList.at(i)->id << shipList.at(i)->isNew;
+        out << shipList.at(i)->id << shipList.at(i)->isNew;
 
         //если корабль новый, то записываем стартовые координаты
         if(shipList.at(i)->isNew){
@@ -164,11 +165,6 @@ void MyServer::sendAllData(){
             << shipList.at(i)->viewAngle
             << shipList.at(i)->viewLength;
         //time and path
-
-        out.device()->seek(0);
-        out<<quint16(block.size()-sizeof(quint16)); //размер блока данных
-        socket->write(block);   //посылка
-        block.clear();          //очистка используемого блока
 
 
         QTextEdit *te = (QTextEdit*)txtStack->widget(i);        //получение указателя на лог текущего корабля
@@ -187,6 +183,11 @@ void MyServer::sendAllData(){
 
         shipList.at(i)->isNew=0;
     }
+
+    out.device()->seek(0);
+    out<<quint16(block.size()-sizeof(quint16)); //размер блока данных
+    socket->write(block);   //посылка
+    block.clear();          //очистка используемого блока
 
 }
 

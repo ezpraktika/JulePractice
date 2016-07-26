@@ -89,15 +89,17 @@ void MyClient::createGui(){
 
     //панель управления логами
 
-    QPushButton *prevButton = new QPushButton("<<");
+    prevButton = new QPushButton("<<");
     prevButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     prevButton->setEnabled(false);
+    connect(prevButton, SIGNAL(clicked(bool)),this,SLOT(slotPrevButton()));
 
-    QPushButton *nextButton = new QPushButton(">>");
+    nextButton = new QPushButton(">>");
     nextButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     nextButton->setEnabled(false);
+    connect(nextButton,SIGNAL(clicked(bool)),this,SLOT(slotNextButton()));
 
-    QLabel *logNumber = new QLabel("1");
+    logNumber = new QLabel("1");
     logNumber->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     QHBoxLayout *logButtonsLayout = new QHBoxLayout;
@@ -139,67 +141,88 @@ void MyClient::slotReadyRead()
 {
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_5_5);
+
+    //в бесконечном цикле считываем данные
+
     for (;;) {
+        //если не знаем размер входящего блока
         if (!nextBlockSize) {
-                if (socket->bytesAvailable() < sizeof(quint16)) {
-                break;
+                if (socket->bytesAvailable() < sizeof(quint16)) {   //если не можем считать размер блока,
+                break;                                              //то выходим
             }
-            in >> nextBlockSize;
+            in >> nextBlockSize;    //иначе - считываем размер блока
         }
+
+        //если из сокета нельзя прочитать весь блок - выходим
         if (socket->bytesAvailable() < nextBlockSize) {
             break;
         }
 
-        quint16 inputIsNew, inputID;
-        //qreal inputStartX, inputStartY;
+        qDebug()<<nextBlockSize;
+        //количество кораблей, данные о которых генерируются на сервере
+        quint16 serverShipCounter, inputIsNew, inputID;
 
-        in >> inputID >> inputIsNew;
+        in >> serverShipCounter;
+        qDebug()<<"serv count  " << serverShipCounter;
 
-        if(inputIsNew){
-            ShipItem *ship = new ShipItem;
-            shipList.append(ship);
-            scene->addItem(ship);
+        for(int j = 0;j<serverShipCounter;j++){
+            in >> inputID >> inputIsNew;
+            qDebug()<<"id " << inputID;
+            qDebug()<<"isnew " << inputIsNew;
+            //если данные о новом корабле
+            if(inputIsNew){
+                ShipItem *ship = new ShipItem;  //создаем новый корабль
+                shipList.append(ship);          //помещаем его в вектор
+                scene->addItem(ship);           //и добавляем на сцену
 
-            shipCounter++;
+                shipCounter++;          //количество кораблей увеличилось
 
-            in >> shipList.at(inputID)->startX
-               >> shipList.at(inputID)->startY;
-        }
+                //если это был не первый добавленный корабль
+                if(shipCounter > 1){
+                    QTextEdit *txt = new QTextEdit; //создаем лог для нового корабля
+                    txt->setReadOnly(true);         //
+                    txt->append("New Ship Created");//
+                    txtStack->addWidget(txt);       //и добавляем в стек виджетов
+                    nextButton->setEnabled(true);
+                }
+                in >> shipList.at(inputID)->startX  //считываем начальные координаты
+                        >> shipList.at(inputID)->startY; //
 
-        shipList.at(inputID)->id = inputID;
-        shipList.at(inputID)->isNew = inputIsNew;
+            }
 
-        in >> shipList.at(inputID)->courseAngle
-           >> shipList.at(inputID)->speed
-           >> shipList.at(inputID)->viewAngle
-           >> shipList.at(inputID)->viewLength;
-        //time and path
+            //помещаем в корабль считанные ранее параметры
+            shipList.at(inputID)->id = inputID;
+            shipList.at(inputID)->isNew = inputIsNew;
+
+            //и считываем остальные
+            in >> shipList.at(inputID)->courseAngle
+                    >> shipList.at(inputID)->speed
+                    >> shipList.at(inputID)->viewAngle
+                    >> shipList.at(inputID)->viewLength;
+            //time and path
 
 
-        if(shipCounter-1){
-            QTextEdit *txt = new QTextEdit;
-            txt->setReadOnly(true);
-            txt->append("New Ship Created");
-            txtStack->addWidget(txt);
-        }
 
-        QTextEdit *te = (QTextEdit*)txtStack->widget(inputID);
-        te->append(QString("Id: %1").arg(shipList.at(inputID)->id));
+            //получаем указатель на нужный лог и записываем в него все считанные данные
+            QTextEdit *te = (QTextEdit*)txtStack->widget(inputID);
+            te->append(QString("Id: %1").arg(shipList.at(inputID)->id));
 
-        if(shipList.at(inputID)->isNew){
-            te->append(QString("Start X: %1\nStart Y: %2")
-                       .arg(shipList.at(inputID)->startX)
-                       .arg(shipList.at(inputID)->startY));
-        }
+            if(shipList.at(inputID)->isNew){
+                te->append(QString("Start X: %1\nStart Y: %2")
+                           .arg(shipList.at(inputID)->startX)
+                           .arg(shipList.at(inputID)->startY));
+            }
 
-        te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
+            te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
                        .arg(shipList.at(inputID)->courseAngle)
                        .arg(shipList.at(inputID)->speed).arg(shipList.at(inputID)->viewAngle)
                        .arg(shipList.at(inputID)->viewLength).arg("later").arg("later"));
-
+        }
+        //новый блок данных
         nextBlockSize = 0;
     }
     scene->advance();
+
 }
 
 void MyClient::slotReactToToggleViewCheckBox(bool checked)
@@ -219,6 +242,42 @@ void MyClient::slotConnected()
 void MyClient::slotShipResize(int val){
     ShipItem* a = (ShipItem*)scene->items().at(0);
     a->shipSize = val;
+}
+
+void MyClient::slotNextButton()
+{
+    //считываем номер текущей страницы
+    int num = logNumber->text().toInt();
+
+    //если это первая страница, то включаем кнопку "<<"
+    if (num == 1) prevButton->setEnabled(true);
+
+    //стек выбирает следующий textEdit для показа
+    txtStack->setCurrentIndex(num);
+
+    //новый номер страницы
+    logNumber->setText(QString::number(++num));
+
+    //если это последняя страница, отключаем кнопку ">>"
+    if(num == shipCounter) nextButton->setEnabled(false);
+}
+
+void MyClient::slotPrevButton()
+{
+    //считываем номер текущей страницы
+    int num = logNumber->text().toInt();
+
+    //если это последняя страница, то включаем кнопку ">>"
+    if (num == shipCounter) nextButton->setEnabled(true);
+
+    //стек выбирает предыдущий textEdit для показа
+    txtStack->setCurrentIndex(num-2);
+
+    //новый номер страницы
+    logNumber->setText(QString::number(--num));
+
+    //если это первая страница, отключаем кнопку "<<"
+    if(num == 1) prevButton->setEnabled(false);
 }
 
 

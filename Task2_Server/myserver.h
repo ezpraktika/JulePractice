@@ -1,7 +1,6 @@
 #ifndef MYSERVER_H
 #define MYSERVER_H
 
-#include <QtGui>
 #include <QWidget>
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -30,22 +29,24 @@ class MyServer : public QWidget
     Q_OBJECT
 
 private:
-    QTcpServer *server;
-    QStackedWidget *txtStack;
     QRect screen;
-    QTimer *timer;
-    QTcpSocket *socket;
-    QVector <ShipItemStruct*> shipList;
-    quint16 shipCounter;
 
+    QTcpServer *server;
+    QTcpSocket *socket;
+
+    QStackedWidget *txtStack;
     QPushButton *prevButton;
     QLabel *logNumber;
     QPushButton *nextButton;
 
+    QTimer *timer;
+
+    QVector <ShipItemStruct*> shipList;
+    quint16 shipCounter;
+
     //лист txt сделать
     void createGui();
     void generateData(ShipItemStruct *ship);
-
 
 public:
     explicit MyServer(int port, QWidget *parent = 0);
