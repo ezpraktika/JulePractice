@@ -61,9 +61,11 @@ void MyServer::createGui(){
 
     //правая панель (кнопки создания и удаления кораблей)
     QPushButton *createShipButton = new QPushButton ("Добавить корабль");
+    createShipButton->setFixedWidth(createShipButton->sizeHint().width()*1.3);
     connect(createShipButton,SIGNAL(clicked()),this,SLOT(slotNewShip()));
 
     deleteShipButton = new QPushButton ("Удалить корабль");
+    deleteShipButton->setFixedWidth(createShipButton->sizeHint().width()*1.3);
     deleteShipButton->setEnabled(false);
     connect(deleteShipButton,SIGNAL(clicked(bool)),this,SLOT(slotDeleteShip()));
 
@@ -95,6 +97,8 @@ void MyServer::slotNewConnection(){
 //слот - создание нового корабля
 void MyServer::slotNewShip(){
 
+    deleteShipButton->setEnabled(false);
+
     //создание корабля
     ShipItemStruct* ship = new ShipItemStruct;
     ship->isNew=1;
@@ -105,22 +109,20 @@ void MyServer::slotNewShip(){
         QTextEdit *txt = (QTextEdit*) txtStack->widget(0);
         txt->append("Ship created");
 
-        deleteShipButton->setEnabled(true);
 
         //shipCounter++;
-        timer->start(400); // TIMER
+        timer->start(4000); // TIMER
     }
+
     //если не первый корабль
     else{
         //создаем новый лог
         QTextEdit *txt = new QTextEdit;
         txt->setReadOnly(true);
-        txt->append("New Ship Created");
+        txt->append("Ship created");
 
         txtStack->addWidget(txt);
         nextButton->setEnabled(true);
-        //shipCounter++;
-        //slotNextButton();
     }
     shipCounter++;
 }
@@ -134,6 +136,8 @@ void MyServer::slotDeleteShip(){
 
     //получаем адрес лога удаляемого корабля
     QTextEdit *txt = (QTextEdit*) txtStack->widget(num-1);
+
+    int indexOfDeleted = shipList.at(num-1)->id;
 
     //удаляем корабль из вектора
     shipList.remove(num-1);
@@ -171,6 +175,7 @@ void MyServer::slotDeleteShip(){
         nextButton->setEnabled(false);
     }
 
+    messageLabel->setText(QString("Ship (ID: %1) has been deleted").arg(indexOfDeleted+1));
     qDebug()<<"ship counter after delete: "<<shipCounter;
     qDebug()<<"shipList size: "<<shipList.size();
     qDebug()<<"stack widget size: " <<txtStack->size();
@@ -264,9 +269,10 @@ void MyServer::sendAllData(){
 
     out.device()->seek(0);  //переход в начало блока
     out<<quint16(block.size()-sizeof(quint16)); //размер блока данных
-    socket->write(block);   //посылка
+    //socket->write(block);   //посылка
     block.clear();          //очистка используемого блока
 
+    if(!deleteShipButton->isEnabled()&& shipCounter>0) deleteShipButton->setEnabled(true);
 }
 
 //генерация новых данных для корабля

@@ -25,15 +25,8 @@ void MyClient::createGui(){
     scene->setSceneRect(0,0,screen.width()*PERCENT_OF_SCREEN,screen.height()*PERCENT_OF_SCREEN);
 
     QPen pen = QPen(Qt::red);
-    QLineF topLine (scene->sceneRect().topLeft(),scene->sceneRect().topRight());
-    QLineF rightLine (scene->sceneRect().topRight(),scene->sceneRect().bottomRight());
-    QLineF bottomLine (scene->sceneRect().bottomLeft(),scene->sceneRect().bottomRight());
-    QLineF leftLine (scene->sceneRect().topLeft(),scene->sceneRect().bottomLeft());
 
-    scene->addLine(topLine,pen);
-    scene->addLine(rightLine,pen);
-    scene->addLine(bottomLine,pen);
-    scene->addLine(leftLine,pen);
+    scene->addRect(scene->sceneRect(), pen);
 
     QRectF turnArea = QRectF(QPointF(40,40),QPointF(screen.width()*PERCENT_OF_SCREEN - 40,screen.height()*PERCENT_OF_SCREEN - 40));
     scene->addRect(turnArea,pen);
