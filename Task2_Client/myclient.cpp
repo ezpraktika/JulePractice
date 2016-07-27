@@ -18,8 +18,11 @@ void MyClient::createGui(){
 
     //панель отрисовки
 
-    scene = new QGraphicsScene;
+    scene = new MyScene;
     QGraphicsView *view = new QGraphicsView(scene);
+    view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+
+    painterScene = new QPainter();
 
     view->setRenderHint(QPainter::Antialiasing);
     view->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -42,9 +45,12 @@ void MyClient::createGui(){
 
 
     QCheckBox *showPathCheckBox = new QCheckBox("Путь");
+    showPathCheckBox->setChecked(true);
+    connect(showPathCheckBox,SIGNAL(toggled(bool)),this,SLOT(slotReactToTogglePathCheckBox(bool)));
+
     QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора");
-    connect(showViewCheckBox,SIGNAL(toggled(bool)),this,SLOT(slotReactToToggleViewCheckBox(bool)));
     showViewCheckBox->setChecked(true);
+    connect(showViewCheckBox,SIGNAL(toggled(bool)),this,SLOT(slotReactToToggleViewCheckBox(bool)));
 
     QLabel *shipSizeLabel = new QLabel("Размер корабля");
     QLabel *pathSizeLabel = new QLabel("Ширина пути");
@@ -57,6 +63,9 @@ void MyClient::createGui(){
 
     QSlider *pathSizeSlider = new QSlider(Qt::Horizontal);
     pathSizeSlider->setMaximumWidth(120);
+    pathSizeSlider->setMinimum(1);
+    pathSizeSlider->setMaximum(5);
+    connect(pathSizeSlider,SIGNAL(valueChanged(int)),this,SLOT(slotPathResize(int)));
 
     QVBoxLayout *connectLayout = new QVBoxLayout;
     connectLayout->addWidget(connectButton);
@@ -185,7 +194,7 @@ void MyClient::slotReadyRead()
             //если данные о новом корабле
             if(inputIsNew){
                 ShipItem *ship = new ShipItem;  //создаем новый корабль
-                shipList.append(ship);          //помещаем его в вектор
+                scene->shipList.append(ship);          //помещаем его в вектор
                 scene->addItem(ship);           //и добавляем на сцену
 
                 shipCounter++;          //количество кораблей увеличилось
@@ -200,43 +209,45 @@ void MyClient::slotReadyRead()
                     nextButton->setEnabled(true);
                 }
 
-                in >> shipList.at(j)->startX  //считываем начальные координаты
-                        >> shipList.at(j)->startY; //
+                in >> scene->shipList.at(j)->startX  //считываем начальные координаты
+                        >> scene->shipList.at(j)->startY; //
 
 
             }
 
 
             //помещаем в корабль считанные ранее параметры
-            shipList.at(j)->id = inputID;
-            shipList.at(j)->isNew = inputIsNew;
+            scene->shipList.at(j)->id = inputID;
+            scene->shipList.at(j)->isNew = inputIsNew;
 
             //и считываем остальные
-            in >> shipList.at(j)->courseAngle
-                    >> shipList.at(j)->speed
-                    >> shipList.at(j)->viewAngle
-                    >> shipList.at(j)->viewLength
-                    >> shipList.at(j)->pathLength
-                    >> shipList.at(j)->time;
+            in >> scene->shipList.at(j)->courseAngle
+                    >> scene->shipList.at(j)->speed
+                    >> scene->shipList.at(j)->viewAngle
+                    >> scene->shipList.at(j)->viewLength
+                    >> scene->shipList.at(j)->pathLength
+                    >> scene->shipList.at(j)->time;
 
             //получаем указатель на нужный лог и записываем в него все считанные данные
             QTextEdit *te = (QTextEdit*)txtStack->widget(j);
-            te->append(QString("Id: %1").arg(shipList.at(j)->id+1));
+            te->append(QString("Id: %1").arg(scene->shipList.at(j)->id+1));
 
-            if(shipList.at(j)->isNew){
+            if(scene->shipList.at(j)->isNew){
                 te->append(QString("Start X: %1\nStart Y: %2")
-                           .arg(shipList.at(j)->startX)
-                           .arg(shipList.at(j)->startY));
+                           .arg(scene->shipList.at(j)->startX)
+                           .arg(scene->shipList.at(j)->startY));
             }
 
             te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
-                       .arg(shipList.at(j)->courseAngle)
-                       .arg(shipList.at(j)->speed).arg(shipList.at(j)->viewAngle)
-                       .arg(shipList.at(j)->viewLength).arg(shipList.at(j)->pathLength).arg(shipList.at(j)->time));
+                       .arg(scene->shipList.at(j)->courseAngle)
+                       .arg(scene->shipList.at(j)->speed).arg(scene->shipList.at(j)->viewAngle)
+                       .arg(scene->shipList.at(j)->viewLength).arg(scene->shipList.at(j)->pathLength).arg(scene->shipList.at(j)->time));
         }
         //новый блок данных
         nextBlockSize = 0;
     }
+
+    scene->drawBackground(painterScene,scene->sceneRect());
     scene->advance();
 
 }
@@ -244,9 +255,14 @@ void MyClient::slotReadyRead()
 //вкл/выкл область видимости
 void MyClient::slotReactToToggleViewCheckBox(bool checked)
 {
+    for(int i = 0; i < scene->shipList.size(); i++){
+        scene->shipList.at(i)->isViewVisible = checked;
+    }
+}
 
-    ShipItem* a = (ShipItem*)scene->items().at(0);
-    a->isViewVisible = checked;
+void MyClient::slotReactToTogglePathCheckBox(bool checked){
+
+    scene->isPathVisible = checked;
 }
 
 //подключиться к серверу
@@ -293,8 +309,13 @@ void MyClient::slotError(QAbstractSocket::SocketError err)
 
 //изменение размеров корабля
 void MyClient::slotShipResize(int val){
-    ShipItem* a = (ShipItem*)scene->items().at(0);
-    a->shipSize = val;
+    for(int i = 0; i < scene->shipList.size(); i++){
+        scene->shipList.at(i)->shipSize = val;
+    }
+}
+
+void MyClient::slotPathResize(int val){
+    scene->pathWidth = val;
 }
 
 //следующий лог
@@ -344,12 +365,12 @@ void MyClient::deleteShip(int num)
     //получаем адрес лога удаляемого корабля
     QTextEdit *txt = (QTextEdit*) txtStack->widget(num-1);
 
-    int idOfDeleted = shipList.at(num-1)->id;
+    int idOfDeleted = scene->shipList.at(num-1)->id;
 
     //удаляем корабль из сцены и вектора
-    ShipItem *ship = shipList.at(num-1);
+    ShipItem *ship = scene->shipList.at(num-1);
     scene->removeItem(ship);
-    shipList.remove(num-1);
+    scene->shipList.remove(num-1);
     delete ship;
 
     shipCounter--;

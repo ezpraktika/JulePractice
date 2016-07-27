@@ -21,6 +21,8 @@ void ShipItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->setBrush(QBrush(Qt::white));
     painter->drawPolygon(polygon);
 
+    painter->drawText(0,-15,QString::number(id));
+
     polygon.clear();
     if(isViewVisible){
         float edge = viewLength * qTan(qDegreesToRadians(viewAngle/2));
@@ -45,12 +47,12 @@ void ShipItem::advance(int phase)
 
     if (isNew){
         isNew = 0;
+        points.append(QPointF(startX,startY));
     }
     else{
-        prevX = startX;
-        prevY = startY;
         startX += qCos(qDegreesToRadians(courseAngle))*speed;
         startY += qSin(qDegreesToRadians(courseAngle))*speed;
+        points.append(QPointF(startX,startY));
     }
 
     setPos(startX,startY);

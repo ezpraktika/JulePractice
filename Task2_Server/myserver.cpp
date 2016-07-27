@@ -111,7 +111,7 @@ void MyServer::slotNewShip(){
 
 
         //shipCounter++;
-        timer->start(4000); // TIMER
+        timer->start(300); // TIMER
     }
 
     //если не первый корабль

@@ -21,8 +21,9 @@
 #include <QStackedWidget>
 #include <QTimer>
 
-#include "shipitem.h"
 
+#include "shipitem.h"
+#include "myscene.h"
 #define PERCENT_OF_SCREEN 0.5f
 
 class MyClient : public QWidget
@@ -51,10 +52,13 @@ private:
     QPushButton *connectButton;
     QLabel *messageLabel;
 
-    QGraphicsScene *scene;  //сцена (карта)
+    MyScene *scene;  //сцена (карта)
 
-    QVector <ShipItem*> shipList;   //вектор кораблей
+//    QVector <ShipItem*> shipList;   //вектор кораблей
     quint16 shipCounter;            //количество кораблей
+
+
+    QPainter* painterScene;
 
 
     void createGui();   //создание интерфейса
@@ -66,6 +70,9 @@ private slots:
 
     void slotReactToToggleViewCheckBox(bool checked);   //вкл/выкл область видимости
     void slotShipResize(int); //изменение размеров корабля
+
+    void slotReactToTogglePathCheckBox(bool checked);
+    void slotPathResize(int);
 
     void slotConnectButton();   //подключение к серверу
     void slotNextButton();      //следующий лог
