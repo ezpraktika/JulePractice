@@ -48,6 +48,9 @@ private:
     QLabel *logNumber;
     QPushButton *nextButton;
 
+    QPushButton *connectButton;
+    QLabel *messageLabel;
+
     QGraphicsScene *scene;  //сцена (карта)
 
     QVector <ShipItem*> shipList;   //вектор кораблей

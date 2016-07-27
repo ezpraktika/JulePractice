@@ -41,6 +41,8 @@ private:
 
     QPushButton *deleteShipButton;
 
+    QLabel *messageLabel;
+
     QTimer *timer;
 
     QVector <ShipItemStruct*> shipList; //вектор указателей на корабли

@@ -40,8 +40,12 @@ void MyClient::createGui(){
 
     //панель управления отрисовкой
 
-    QPushButton *connectButton = new QPushButton("Connect");
+    connectButton = new QPushButton("Connect");
+    connectButton->setFixedWidth(connectButton->sizeHint().width()*2);
     connect(connectButton,SIGNAL(clicked(bool)),this,SLOT(slotConnectButton()));
+    connect(connectButton,SIGNAL(clicked(bool)),connectButton,SLOT(setEnabled(bool)));
+    messageLabel = new QLabel;
+
 
     QCheckBox *showPathCheckBox = new QCheckBox("Путь");
     QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора");
@@ -60,6 +64,10 @@ void MyClient::createGui(){
     QSlider *pathSizeSlider = new QSlider(Qt::Horizontal);
     pathSizeSlider->setMaximumWidth(120);
 
+    QVBoxLayout *connectLayout = new QVBoxLayout;
+    connectLayout->addWidget(connectButton);
+    connectLayout->addWidget(messageLabel);
+
     QVBoxLayout *checkBoxLayout = new QVBoxLayout;
     checkBoxLayout->addWidget(showPathCheckBox);
     checkBoxLayout->addWidget(showViewCheckBox);
@@ -73,7 +81,7 @@ void MyClient::createGui(){
     sliderLayout->addWidget(pathSizeSlider);
 
     QHBoxLayout *controlButtons= new QHBoxLayout;
-    controlButtons->addWidget(connectButton);
+    controlButtons->addLayout(connectLayout);
     controlButtons->insertStretch(-1);
     controlButtons->addLayout(checkBoxLayout);
     controlButtons->insertStretch(-1);
@@ -244,33 +252,32 @@ void MyClient::slotConnectButton(){
 //соединение установлено
 void MyClient::slotConnected()
 {
-    qDebug()<<"nnice connct";
-   // txt->append("Received the connected() signal");
+    messageLabel->setText("Connected");
+    connectButton->setText("Disconnect");
+    connectButton->setEnabled(true);
 }
 
 
 //сообщения об ошибках
 void MyClient::slotError(QAbstractSocket::SocketError err)
 {
-
-    QString strError;
-
     switch(err){
     case QAbstractSocket::HostNotFoundError:
-        strError = "The host was not found";
+        messageLabel->setText("The host was not found");
         break;
     case QAbstractSocket::RemoteHostClosedError:
-        strError = "The remote host is closed";
+        messageLabel->setText("The remote host is closed");
         break;
     case QAbstractSocket::ConnectionRefusedError:
-        strError = "The connection was refused";
+        messageLabel->setText("The connection was refused");
+        connectButton->setEnabled(true);
         break;
     default:
-        strError=QString(socket->errorString());
+        messageLabel->setText(QString(socket->errorString()));
         break;
     }
 
-    qDebug()<<strError;
+
 }
 
 

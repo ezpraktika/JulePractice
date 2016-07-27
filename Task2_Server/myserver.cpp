@@ -62,13 +62,18 @@ void MyServer::createGui(){
     //правая панель (кнопки создания и удаления кораблей)
     QPushButton *createShipButton = new QPushButton ("Добавить корабль");
     connect(createShipButton,SIGNAL(clicked()),this,SLOT(slotNewShip()));
+
     deleteShipButton = new QPushButton ("Удалить корабль");
     deleteShipButton->setEnabled(false);
     connect(deleteShipButton,SIGNAL(clicked(bool)),this,SLOT(slotDeleteShip()));
 
+    messageLabel=new QLabel;
+
+
     QVBoxLayout *rightPanelLayout = new QVBoxLayout;
     rightPanelLayout->addWidget(createShipButton);
     rightPanelLayout->addWidget(deleteShipButton);
+    rightPanelLayout->addWidget(messageLabel);
     rightPanelLayout->insertStretch(-1);
 
 
@@ -84,6 +89,7 @@ void MyServer::createGui(){
 void MyServer::slotNewConnection(){
     socket = server->nextPendingConnection();
     connect(socket,SIGNAL(disconnected()),socket,SLOT(deleteLater()));
+    messageLabel->setText("Client connected");
 }
 
 //слот - создание нового корабля
