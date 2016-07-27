@@ -137,7 +137,7 @@ void MyServer::slotDeleteShip(){
     //получаем адрес лога удаляемого корабля
     QTextEdit *txt = (QTextEdit*) txtStack->widget(num-1);
 
-    int indexOfDeleted = shipList.at(num-1)->id;
+    int idOfDeleted = shipList.at(num-1)->id;
 
     //удаляем корабль из вектора
     shipList.remove(num-1);
@@ -175,7 +175,9 @@ void MyServer::slotDeleteShip(){
         nextButton->setEnabled(false);
     }
 
-    messageLabel->setText(QString("Ship (ID: %1) has been deleted").arg(indexOfDeleted+1));
+    messageLabel->setText(QString("Ship (ID: %1) - deleted").arg(idOfDeleted+1));
+    logNumbersOfRemovedShips.append(num);         //добавить в список номер лога удаленного корабля
+
     qDebug()<<"ship counter after delete: "<<shipCounter;
     qDebug()<<"shipList size: "<<shipList.size();
     qDebug()<<"stack widget size: " <<txtStack->size();
@@ -223,11 +225,21 @@ void MyServer::slotPrevButton()
 
 //отправление данных по всем кораблям
 void MyServer::sendAllData(){
+    //deleteShipButton->setEnabled(false);
 
     QByteArray block;
     QDataStream out (&block, QIODevice::WriteOnly);
     out.setVersion(QDataStream::Qt_5_5);
-    out<<quint16(0)<<shipCounter;
+
+    out << quint16(0) << logNumbersOfRemovedShips.size();       //количество удаленных кораблей
+    for(int k = 0; k < logNumbersOfRemovedShips.size(); k++){   //номер лога удаленного корабля
+        out << logNumbersOfRemovedShips.at(k);                  //
+    }
+
+    logNumbersOfRemovedShips.clear();
+
+    out << shipCounter;     //количество существующих на сервере кораблей
+
     //для всех кораблей
     for(int i=0; i < shipCounter; i++){
 
@@ -269,7 +281,7 @@ void MyServer::sendAllData(){
 
     out.device()->seek(0);  //переход в начало блока
     out<<quint16(block.size()-sizeof(quint16)); //размер блока данных
-    //socket->write(block);   //посылка
+    socket->write(block);   //посылка
     block.clear();          //очистка используемого блока
 
     if(!deleteShipButton->isEnabled()&& shipCounter>0) deleteShipButton->setEnabled(true);

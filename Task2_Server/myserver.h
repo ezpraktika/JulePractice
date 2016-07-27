@@ -48,6 +48,7 @@ private:
     QVector <ShipItemStruct*> shipList; //вектор указателей на корабли
     quint16 shipCounter;        //количество кораблей
     quint16 shipIndexCounter;   //для неповторяющейся индексации кораблей
+    QVector <quint16> logNumbersOfRemovedShips; //индексы удаленных кораблей
 
     void createGui();                           //создание интерфейса
     void generateData(ShipItemStruct *ship);    //генерация данных

@@ -2,7 +2,8 @@
 
 MyClient::MyClient(const QString& host, int port, QWidget *parent) :
     QWidget(parent),
-    nextBlockSize(0)
+    nextBlockSize(0),
+    shipCounter(0)
 {
     screen = QApplication::desktop()->screenGeometry();
 
@@ -140,7 +141,6 @@ void MyClient::createGui(){
 
 void MyClient::slotReadyRead()
 {
-    qDebug()<<"ready read";
     QDataStream in(socket);
     in.setVersion(QDataStream::Qt_5_5);
 
@@ -160,11 +160,24 @@ void MyClient::slotReadyRead()
             break;
         }
 
-        qDebug()<<nextBlockSize;
         //количество кораблей, данные о которых генерируются на сервере
         quint16 serverShipCounter, inputIsNew, inputID;
 
+        int numOfRemovedShips;
+
+        in >> numOfRemovedShips;
+
+        if(numOfRemovedShips){
+            quint16 removeLogNumber;
+            for(int k = 0; k < numOfRemovedShips; k++){
+                in >> removeLogNumber;
+                deleteShip(removeLogNumber);
+            }
+        }
+
         in >> serverShipCounter;
+
+
 
         for(int j = 0;j<serverShipCounter;j++){
             in >> inputID >> inputIsNew;
@@ -181,41 +194,45 @@ void MyClient::slotReadyRead()
                 if(shipCounter > 1){
                     QTextEdit *txt = new QTextEdit; //создаем лог для нового корабля
                     txt->setReadOnly(true);         //
-                    txt->append("New Ship Created");//
                     txtStack->addWidget(txt);       //и добавляем в стек виджетов
+                    qDebug()<<"in is new";
+                    qDebug()<<"ship count " <<shipCounter;
                     nextButton->setEnabled(true);
                 }
-                in >> shipList.at(inputID)->startX  //считываем начальные координаты
-                        >> shipList.at(inputID)->startY; //
+
+                in >> shipList.at(j)->startX  //считываем начальные координаты
+                        >> shipList.at(j)->startY; //
+
 
             }
 
+
             //помещаем в корабль считанные ранее параметры
-            shipList.at(inputID)->id = inputID;
-            shipList.at(inputID)->isNew = inputIsNew;
+            shipList.at(j)->id = inputID;
+            shipList.at(j)->isNew = inputIsNew;
 
             //и считываем остальные
-            in >> shipList.at(inputID)->courseAngle
-                    >> shipList.at(inputID)->speed
-                    >> shipList.at(inputID)->viewAngle
-                    >> shipList.at(inputID)->viewLength
-                    >> shipList.at(inputID)->pathLength
-                    >> shipList.at(inputID)->time;
+            in >> shipList.at(j)->courseAngle
+                    >> shipList.at(j)->speed
+                    >> shipList.at(j)->viewAngle
+                    >> shipList.at(j)->viewLength
+                    >> shipList.at(j)->pathLength
+                    >> shipList.at(j)->time;
 
             //получаем указатель на нужный лог и записываем в него все считанные данные
-            QTextEdit *te = (QTextEdit*)txtStack->widget(inputID);
-            te->append(QString("Id: %1").arg(shipList.at(inputID)->id));
+            QTextEdit *te = (QTextEdit*)txtStack->widget(j);
+            te->append(QString("Id: %1").arg(shipList.at(j)->id+1));
 
-            if(shipList.at(inputID)->isNew){
+            if(shipList.at(j)->isNew){
                 te->append(QString("Start X: %1\nStart Y: %2")
-                           .arg(shipList.at(inputID)->startX)
-                           .arg(shipList.at(inputID)->startY));
+                           .arg(shipList.at(j)->startX)
+                           .arg(shipList.at(j)->startY));
             }
 
             te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
-                       .arg(shipList.at(inputID)->courseAngle)
-                       .arg(shipList.at(inputID)->speed).arg(shipList.at(inputID)->viewAngle)
-                       .arg(shipList.at(inputID)->viewLength).arg(shipList.at(inputID)->pathLength).arg(shipList.at(inputID)->time));
+                       .arg(shipList.at(j)->courseAngle)
+                       .arg(shipList.at(j)->speed).arg(shipList.at(j)->viewAngle)
+                       .arg(shipList.at(j)->viewLength).arg(shipList.at(j)->pathLength).arg(shipList.at(j)->time));
         }
         //новый блок данных
         nextBlockSize = 0;
@@ -306,6 +323,7 @@ void MyClient::slotPrevButton()
     int num = logNumber->text().toInt();
 
     //если это последняя страница, то включаем кнопку ">>"
+
     if (num == shipCounter) nextButton->setEnabled(true);
 
     //стек выбирает предыдущий textEdit для показа
@@ -316,6 +334,61 @@ void MyClient::slotPrevButton()
 
     //если это первая страница, отключаем кнопку "<<"
     if(num == 1) prevButton->setEnabled(false);
+}
+
+//удаление корабля с номером лога num
+void MyClient::deleteShip(int num)
+{
+    int currentLogNumber = logNumber->text().toInt(); //показываемый в клиенте лог
+
+    //получаем адрес лога удаляемого корабля
+    QTextEdit *txt = (QTextEdit*) txtStack->widget(num-1);
+
+    int idOfDeleted = shipList.at(num-1)->id;
+
+    //удаляем корабль из сцены и вектора
+    ShipItem *ship = shipList.at(num-1);
+    scene->removeItem(ship);
+    shipList.remove(num-1);
+    delete ship;
+
+    shipCounter--;
+
+    //если это был последний корабль
+    if(shipCounter==0){
+        txt->clear();   //очищаем лог
+    }
+    //иначе
+    else{
+
+        txtStack->removeWidget(txt);  //удаляем лог
+
+        if(currentLogNumber > shipCounter){                            //если номер лога больше количества кораблей
+            logNumber->setText(QString::number(currentLogNumber-1));   //обновляем номер
+            txtStack->setCurrentIndex(currentLogNumber-2);
+        }
+        else{
+            txtStack->setCurrentIndex(currentLogNumber-1);
+        }
+
+        delete txt; //очистка памяти
+    }
+
+    //если в итоге оказались на первом логе
+    if(!txtStack->currentIndex()){
+        prevButton->setEnabled(false);
+    }
+
+    //если в итоге оказались на последнем логе
+    if((txtStack->currentIndex()+1)==shipCounter){
+        nextButton->setEnabled(false);
+    }
+
+    messageLabel->setText(QString("Ship (ID: %1) has been deleted").arg(idOfDeleted+1));
+
+
+    //удалить объект со сцены
+
 }
 
 

@@ -70,6 +70,8 @@ private slots:
     void slotConnectButton();   //подключение к серверу
     void slotNextButton();      //следующий лог
     void slotPrevButton();      //предыдущий лог
+
+    void deleteShip(int num);   //удаление корабля по номеру лога
 };
 
 #endif // MYCLIENT_H
