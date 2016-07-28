@@ -54,6 +54,9 @@ private:
 
     QPushButton *connectButton;
     QPushButton *clearPathButton;
+
+    QSlider *shipSizeSlider;
+
     QLabel *messageLabel;
 
     MyScene *scene;  //сцена (карта)

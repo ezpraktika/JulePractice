@@ -3,16 +3,16 @@
 
 MyScene::MyScene():QGraphicsScene(){
     isPathVisible = true;
-    pathWidth = 1;
+    pathWidth = 0;
 }
 
 
 void MyScene::drawBackground(QPainter *painter, const QRectF &rect){
 
+    QPen pen(Qt::darkGray,2+pathWidth*0.5f,Qt::DashDotLine, Qt::SquareCap,Qt::RoundJoin);
+    if(pathWidth>3) pen.setStyle(Qt::SolidLine);
+    painter->setPen(pen);
 
-
-
-    painter->setPen(QPen(QBrush(QColor(0,0,0)),pathWidth));
     if (isPathVisible){
         for(int i = 0; i < shipList.size(); i++){
 
@@ -26,9 +26,7 @@ void MyScene::drawBackground(QPainter *painter, const QRectF &rect){
     }
 
     else{
-
         painter->eraseRect(rect);
-
     }
 
 

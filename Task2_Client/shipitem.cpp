@@ -2,7 +2,7 @@
 
 ShipItem::ShipItem()
 {
-    shipSize = 1;
+    shipSize = 0;
     isViewVisible = true;
 }
 
@@ -21,7 +21,7 @@ void ShipItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->setBrush(QBrush(Qt::white));
     painter->drawPolygon(polygon);
 
-    painter->drawText(0,-15,QString::number(id));
+    painter->drawText(-5,-15,QString::number(id+1));
 
     polygon.clear();
     if(isViewVisible){
@@ -57,7 +57,7 @@ void ShipItem::advance(int phase)
 
     setPos(startX,startY);      //переместить по новым координатам
     setRotation(courseAngle);   //повернуть в соответствии с курсом
-    setScale(shipSize);         //увеличить размеры
+    setScale(1+shipSize*0.2);         //увеличить размеры
 
 }
 

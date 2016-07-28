@@ -32,13 +32,6 @@ void MyClient::createGui(){
     view->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     scene->setSceneRect(0,0,screen.width()*PERCENT_OF_SCREEN,screen.height()*PERCENT_OF_SCREEN);
 
-    QPen pen = QPen(Qt::red);
-
-    scene->addRect(scene->sceneRect(), pen);
-
-    QRectF turnArea = QRectF(QPointF(40,40),QPointF(screen.width()*PERCENT_OF_SCREEN - 40,screen.height()*PERCENT_OF_SCREEN - 40));
-    scene->addRect(turnArea,pen);
-
     //панель управления отрисовкой
 
     connectButton = new QPushButton("Connect");
@@ -60,16 +53,16 @@ void MyClient::createGui(){
     QLabel *shipSizeLabel = new QLabel("Размер корабля");
     QLabel *pathSizeLabel = new QLabel("Ширина пути");
 
-    QSlider *shipSizeSlider = new QSlider(Qt::Horizontal);
+    shipSizeSlider = new QSlider(Qt::Horizontal);
     shipSizeSlider->setMaximumWidth(120);
-    shipSizeSlider->setMinimum(1);
+    shipSizeSlider->setMinimum(0);
     shipSizeSlider->setMaximum(5);
     connect(shipSizeSlider,SIGNAL(valueChanged(int)),this,SLOT(slotShipResize(int)));
 
     QSlider *pathSizeSlider = new QSlider(Qt::Horizontal);
     pathSizeSlider->setMaximumWidth(120);
-    pathSizeSlider->setMinimum(1);
-    pathSizeSlider->setMaximum(5);
+    pathSizeSlider->setMinimum(0);
+    pathSizeSlider->setMaximum(7);
     connect(pathSizeSlider,SIGNAL(valueChanged(int)),this,SLOT(slotPathResize(int)));
 
     clearPathButton = new QPushButton("Стереть пути");
@@ -89,8 +82,9 @@ void MyClient::createGui(){
 
 
     QVBoxLayout *sliderLayout = new QVBoxLayout;
-    sliderLayout->addWidget(shipSizeSlider);
     sliderLayout->addWidget(pathSizeSlider);
+    sliderLayout->addWidget(shipSizeSlider);
+
 
     QVBoxLayout *clearPathLayout = new QVBoxLayout;
     clearPathLayout->addWidget(clearPathButton);
@@ -206,7 +200,7 @@ void MyClient::slotReadyRead()
 
 
         for(int j = 0;j<serverShipCounter;j++){
-            in >> inputID /*>> inputIsNew*/;
+            in >> inputID;
 
             bool newOnThisClient = !idOfExistingShips.contains(inputID);
 
@@ -215,6 +209,7 @@ void MyClient::slotReadyRead()
                 idOfExistingShips.insert(inputID);
 
                 ShipItem *ship = new ShipItem;  //создаем новый корабль
+                ship->shipSize=shipSizeSlider->value();
                 scene->shipList.append(ship);   //помещаем его в вектор
                 scene->addItem(ship);           //и добавляем на сцену
 
@@ -254,10 +249,10 @@ void MyClient::slotReadyRead()
                            .arg(scene->shipList.at(j)->startY));
             }
 
-            te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
+            te->append(QString("Course angle: %1 deg\nSpeed: %2\nView angle: %3 deg\nViewLength: %4\nPath length: %5 m\nTime: %6 sec\n")
                        .arg(scene->shipList.at(j)->courseAngle)
                        .arg(scene->shipList.at(j)->speed).arg(scene->shipList.at(j)->viewAngle)
-                       .arg(scene->shipList.at(j)->viewLength).arg(scene->shipList.at(j)->pathLength).arg(scene->shipList.at(j)->time));
+                       .arg(scene->shipList.at(j)->viewLength).arg(scene->shipList.at(j)->pathLength).arg(scene->shipList.at(j)->time/1000.0f));
         }
         //новый блок данных
         nextBlockSize = 0;
@@ -324,8 +319,9 @@ void MyClient::slotError(QAbstractSocket::SocketError err)
         messageLabel->setText("The host was not found");
         break;
     case QAbstractSocket::RemoteHostClosedError:
-        messageLabel->setText("The remote host is closed");
+
         clearAllData();
+        messageLabel->setText("The remote host is closed");
         break;
     case QAbstractSocket::ConnectionRefusedError:
         messageLabel->setText("The connection was refused");
@@ -413,6 +409,7 @@ void MyClient::deleteShip(int num)
     ShipItem *ship = scene->shipList.at(num-1);
     idOfExistingShips.remove(ship->id);
     scene->removeItem(ship);
+
     scene->shipList.remove(num-1);
     delete ship;
 
@@ -457,14 +454,14 @@ void MyClient::clearAllData()
 {
     socket->close();
 
-    for(int i = 1; i <= shipCounter; i++){
-        deleteShip(i);
+    quint16 count = shipCounter;
+
+    for(int i = 1; i <= count; i++){
+        deleteShip(1);
     }
 
     connectButton->setText("Connect");
     connectButton->setEnabled(true);
-
-
 
     isConnected = false;
 

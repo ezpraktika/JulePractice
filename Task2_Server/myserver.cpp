@@ -122,7 +122,7 @@ void MyServer::slotNewShip(){
 
 
         //shipCounter++;
-        timer->start(1000); // TIMER
+        timer->start(500); // TIMER
     }
 
     //если не первый корабль
@@ -274,10 +274,12 @@ void MyServer::sendAllData(){
                        .arg(shipList.at(i)->startY));
         }
 
-        te->append(QString("Course angle: %1\nSpeed: %2\nView angle: %3\nViewLength: %4\nPath length: %5\nTime: %6\n")
+
+
+        te->append(QString("Course angle: %1 deg\nSpeed: %2\nView angle: %3 deg\nViewLength: %4\nPath length: %5 m\nTime: %6 sec\n")
                        .arg(shipList.at(i)->courseAngle)
                        .arg(shipList.at(i)->speed).arg(shipList.at(i)->viewAngle)
-                       .arg(shipList.at(i)->viewLength).arg(shipList.at(i)->pathLength).arg(shipList.at(i)->time));
+                       .arg(shipList.at(i)->viewLength).arg(shipList.at(i)->pathLength).arg(shipList.at(i)->time/1000.0f));
 
         shipList.at(i)->isNew=0;
     }
@@ -295,11 +297,11 @@ void MyServer::generateData(ShipItemStruct *ship){
 
     //если новый корабль, то задаются стартовые параметры
     if(ship->isNew==1){
-        ship->startX=100;
-        ship->startY=100;
+        ship->startX=(qrand()% (int) (screen.width()*PERCENT_OF_SCREEN-200))+100;
+        ship->startY=(qrand()%  (int) (screen.height()*PERCENT_OF_SCREEN-200))+100;
         ship->id=shipIndexCounter;
-        ship->courseAngle=0.0f;
-        ship->speed=20;
+        ship->courseAngle= (qreal) (qrand() % 361) - 180.0f;
+        ship->speed=qrand()%21 + 15;
         ship->viewAngle = 35.0f;
         ship->viewLength = 100;
         ship->timer.start();
@@ -324,10 +326,10 @@ void MyServer::generateData(ShipItemStruct *ship){
             if (!ship->turnAlreadyStarted){ //если разворот еще не начался
 
                 if(qrand()%2) {         //то начинаем поворот в случайную сторону
-                    ship->delta=30.0f;
+                    ship->delta=25.0f;
                 }
                 else {
-                    ship->delta=-30.0f;
+                    ship->delta=-25.0f;
                 }
                 ship->deltaCount=-1;
                 ship->turnAlreadyStarted=true;
