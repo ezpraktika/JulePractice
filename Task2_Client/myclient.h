@@ -55,6 +55,7 @@ private:
     QPushButton *connectButton;     //кнопка подключения
     QPushButton *clearPathButton;   //кнопка очистки путей
 
+    QCheckBox *showViewCheckBox;    //вкл/выкл область видимости
     QSlider *shipSizeSlider;    //слайдер размеров корабля
 
     QLabel *messageLabel;   //панель сообщений

@@ -11,30 +11,12 @@ MyScene::~MyScene()
 
 }
 
-QVector<ShipItem *> MyScene::getShipList() const
-{
-    return shipList;
-}
-
-void MyScene::setShipList(const QVector<ShipItem *> &value)
-{
-    shipList = value;
-}
-
-bool MyScene::getIsPathVisible() const
-{
-    return isPathVisible;
-}
 
 void MyScene::setIsPathVisible(bool value)
 {
     isPathVisible = value;
 }
 
-int MyScene::getPathWidth() const
-{
-    return pathWidth;
-}
 
 void MyScene::setPathWidth(int value)
 {

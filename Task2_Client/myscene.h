@@ -11,19 +11,15 @@ public:
     MyScene();
     ~MyScene();
 
-    QVector<ShipItem *> getShipList() const;
-    void setShipList(const QVector<ShipItem *> &value);
+     QVector<ShipItem*> shipList;
 
-    bool getIsPathVisible() const;
     void setIsPathVisible(bool value);
-
-    int getPathWidth() const;
     void setPathWidth(int value);
 
     void drawBackground(QPainter *painter, const QRectF &rect);
 
 private:
-    QVector<ShipItem*> shipList;
+
     bool isPathVisible;     //вкл/выкл отрисовку пути
     int pathWidth;          //модификатор ширины пути
 

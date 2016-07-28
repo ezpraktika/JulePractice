@@ -46,7 +46,7 @@ void MyClient::createGui(){
     showPathCheckBox->setChecked(true);
     connect(showPathCheckBox,SIGNAL(toggled(bool)),this,SLOT(slotReactToTogglePathCheckBox(bool)));
 
-    QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора",this);
+    showViewCheckBox = new QCheckBox("Угол обзора",this);
     showViewCheckBox->setChecked(true);
     connect(showViewCheckBox,SIGNAL(toggled(bool)),this,SLOT(slotReactToToggleViewCheckBox(bool)));
 
@@ -211,7 +211,8 @@ void MyClient::slotReadyRead()
                 idOfExistingShips.insert(inputID);
 
                 ShipItem *ship = new ShipItem;  //создаем новый корабль
-                ship->shipSize=shipSizeSlider->value();
+                ship->setShipSize(shipSizeSlider->value());
+                ship->setIsViewVisible(showViewCheckBox->isChecked());
                 scene->shipList.append(ship);   //помещаем его в вектор
                 scene->addItem(ship);           //и добавляем на сцену
 
@@ -226,35 +227,44 @@ void MyClient::slotReadyRead()
                 }
             }
 
+            qreal inputStartX, inputStartY, inputCourseAngle, inputViewAngle, inputPathLength;
+            quint16 inputSpeed, inputViewLength;
+            int inputTime;
 
-            //помещаем в корабль считанный ранее ID
-            scene->shipList.at(j)->id = inputID;
-            scene->shipList.at(j)->isNew = newOnThisClient;
 
-            //и считываем остальные данные
-            in >> scene->getShipList().at(j)->startX
-               >> scene->shipList.at(j)->startY
-               >> scene->shipList.at(j)->courseAngle
-               >> scene->shipList.at(j)->speed
-               >> scene->shipList.at(j)->viewAngle
-               >> scene->shipList.at(j)->viewLength
-               >> scene->shipList.at(j)->pathLength
-               >> scene->shipList.at(j)->time;
+
+
+            // считываем остальные данные
+            in >> inputStartX >> inputStartY >> inputCourseAngle >> inputSpeed >> inputViewAngle >> inputViewLength
+               >> inputPathLength >> inputTime;
+
+            //и помещаем их в корабль
+
+            scene->shipList.at(j)->setId (inputID);
+            scene->shipList.at(j)->setIsNew (newOnThisClient);
+            scene->shipList.at(j)->setStartX (inputStartX);
+            scene->shipList.at(j)->setStartY (inputStartY);
+            scene->shipList.at(j)->setCourseAngle (inputCourseAngle);
+            scene->shipList.at(j)->setSpeed (inputSpeed);
+            scene->shipList.at(j)->setViewAngle (inputViewAngle);
+            scene->shipList.at(j)->setViewLength (inputViewLength);
+            scene->shipList.at(j)->setPathLength (inputPathLength);
+            scene->shipList.at(j)->setTime(inputTime);
 
             //получаем указатель на нужный лог и записываем в него все считанные данные
             QTextEdit *te = (QTextEdit*)txtStack->widget(j);
-            te->append(QString("Id: %1").arg(scene->shipList.at(j)->id+1));
+            te->append(QString("Id: %1").arg(scene->shipList.at(j)->getId()+1));
 
-            if(scene->shipList.at(j)->isNew){
+            if(scene->shipList.at(j)->getIsNew()){
                 te->append(QString("Start X: %1\nStart Y: %2")
-                           .arg(scene->shipList.at(j)->startX)
-                           .arg(scene->shipList.at(j)->startY));
+                           .arg(scene->shipList.at(j)->getStartX())
+                           .arg(scene->shipList.at(j)->getStartY()));
             }
 
             te->append(QString("Course angle: %1 deg\nSpeed: %2\nView angle: %3 deg\nViewLength: %4\nPath length: %5 m\nTime: %6 sec\n")
-                       .arg(scene->shipList.at(j)->courseAngle)
-                       .arg(scene->shipList.at(j)->speed).arg(scene->shipList.at(j)->viewAngle)
-                       .arg(scene->shipList.at(j)->viewLength).arg(scene->shipList.at(j)->pathLength).arg(scene->shipList.at(j)->time/1000.0f));
+                       .arg(scene->shipList.at(j)->getCourseAngle())
+                       .arg(scene->shipList.at(j)->getSpeed()).arg(scene->shipList.at(j)->getViewAngle())
+                       .arg(scene->shipList.at(j)->getViewLength()).arg(scene->shipList.at(j)->getPathLength()).arg(scene->shipList.at(j)->getTime()/1000.0f));
         }
         //новый блок данных
         nextBlockSize = 0;
@@ -268,13 +278,13 @@ void MyClient::slotReadyRead()
 void MyClient::slotReactToToggleViewCheckBox(bool checked)
 {
     for(int i = 0; i < scene->shipList.size(); i++){
-        scene->shipList.at(i)->isViewVisible = checked;
+        scene->shipList.at(i)->setIsViewVisible(checked);
     }
 }
 
 //вкл/выкл путь
 void MyClient::slotReactToTogglePathCheckBox(bool checked){
-    scene->isPathVisible = checked;
+    scene->setIsPathVisible(checked);
 }
 
 //подключиться к серверу
@@ -335,13 +345,13 @@ void MyClient::slotError(QAbstractSocket::SocketError err)
 //изменение размеров корабля
 void MyClient::slotShipResize(int val){
     for(int i = 0; i < scene->shipList.size(); i++){
-        scene->shipList.at(i)->shipSize = val;
+        scene->shipList.at(i)->setShipSize(val);
     }
 }
 
 //изменение ширины пути
 void MyClient::slotPathResize(int val){
-    scene->pathWidth = val;
+    scene->setPathWidth (val);
 }
 
 //следующий лог
@@ -400,11 +410,11 @@ void MyClient::deleteShip(int num)
     //получаем адрес лога удаляемого корабля
     QTextEdit *txt = (QTextEdit*) txtStack->widget(num-1);
 
-    int idOfDeleted = scene->shipList.at(num-1)->id;
+    int idOfDeleted = scene->shipList.at(num-1)->getId();
 
     //удаляем корабль из сцены и вектора
     ShipItem *ship = scene->shipList.at(num-1);
-    idOfExistingShips.remove(ship->id);
+    idOfExistingShips.remove(ship->getId());
     scene->removeItem(ship);
 
     scene->shipList.remove(num-1);

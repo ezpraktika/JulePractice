@@ -16,44 +16,45 @@ public:
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-    quint16 getId() const;
+    quint16 getId() ;
     void setId(const quint16 &value);
 
-    qreal getCourseAngle() const;
+    qreal getCourseAngle() ;
     void setCourseAngle(const qreal &value);
 
-    quint16 getSpeed() const;
+    quint16 getSpeed() ;
     void setSpeed(const quint16 &value);
 
-    qreal getViewAngle() const;
+    qreal getViewAngle() ;
     void setViewAngle(const qreal &value);
 
-    quint16 getViewLength() const;
+    quint16 getViewLength() ;
     void setViewLength(const quint16 &value);
 
-    int getTime() const;
+    int getTime() ;
     void setTime(int value);
 
-    qreal getPathLength() const;
+    qreal getPathLength() ;
     void setPathLength(const qreal &value);
 
-    quint16 getShipSize() const;
+    quint16 getShipSize() ;
     void setShipSize(const quint16 &value);
 
-    bool getIsViewVisible() const;
+    bool getIsViewVisible() ;
     void setIsViewVisible(bool value);
 
-    quint16 getIsNew() const;
+    quint16 getIsNew() ;
     void setIsNew(const quint16 &value);
 
-    qreal getStartX() const;
+    qreal getStartX() ;
     void setStartX(const qreal &value);
 
-    qreal getStartY() const;
+    qreal getStartY() ;
     void setStartY(const qreal &value);
 
-    QVector<QPointF> getPoints() const;
-    void setPoints(const QVector<QPointF> &value);
+     QVector<QPointF> points; //путь
+
+
 
 protected:
     void advance(int phase);
@@ -75,7 +76,7 @@ private:
     qreal startX;   //координаты на текущем этапе
     qreal startY;   //
 
-    QVector<QPointF> points; //путь
+
 };
 
 #endif // SHIPITEM_H

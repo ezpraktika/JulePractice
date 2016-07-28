@@ -64,17 +64,9 @@ void ShipItem::advance(int phase)
 
 }
 
-QVector<QPointF> ShipItem::getPoints() const
-{
-    return points;
-}
 
-void ShipItem::setPoints(const QVector<QPointF> &value)
-{
-    points = value;
-}
 
-qreal ShipItem::getStartY() const
+qreal ShipItem::getStartY()
 {
     return startY;
 }
@@ -84,7 +76,7 @@ void ShipItem::setStartY(const qreal &value)
     startY = value;
 }
 
-qreal ShipItem::getStartX() const
+qreal ShipItem::getStartX()
 {
     return startX;
 }
@@ -94,7 +86,7 @@ void ShipItem::setStartX(const qreal &value)
     startX = value;
 }
 
-quint16 ShipItem::getIsNew() const
+quint16 ShipItem::getIsNew()
 {
     return isNew;
 }
@@ -104,7 +96,7 @@ void ShipItem::setIsNew(const quint16 &value)
     isNew = value;
 }
 
-bool ShipItem::getIsViewVisible() const
+bool ShipItem::getIsViewVisible()
 {
     return isViewVisible;
 }
@@ -114,7 +106,7 @@ void ShipItem::setIsViewVisible(bool value)
     isViewVisible = value;
 }
 
-quint16 ShipItem::getShipSize() const
+quint16 ShipItem::getShipSize()
 {
     return shipSize;
 }
@@ -124,7 +116,7 @@ void ShipItem::setShipSize(const quint16 &value)
     shipSize = value;
 }
 
-qreal ShipItem::getPathLength() const
+qreal ShipItem::getPathLength()
 {
     return pathLength;
 }
@@ -134,7 +126,7 @@ void ShipItem::setPathLength(const qreal &value)
     pathLength = value;
 }
 
-int ShipItem::getTime() const
+int ShipItem::getTime()
 {
     return time;
 }
@@ -144,7 +136,7 @@ void ShipItem::setTime(int value)
     time = value;
 }
 
-quint16 ShipItem::getViewLength() const
+quint16 ShipItem::getViewLength()
 {
     return viewLength;
 }
@@ -154,7 +146,7 @@ void ShipItem::setViewLength(const quint16 &value)
     viewLength = value;
 }
 
-qreal ShipItem::getViewAngle() const
+qreal ShipItem::getViewAngle()
 {
     return viewAngle;
 }
@@ -164,7 +156,7 @@ void ShipItem::setViewAngle(const qreal &value)
     viewAngle = value;
 }
 
-quint16 ShipItem::getSpeed() const
+quint16 ShipItem::getSpeed()
 {
     return speed;
 }
@@ -174,7 +166,7 @@ void ShipItem::setSpeed(const quint16 &value)
     speed = value;
 }
 
-qreal ShipItem::getCourseAngle() const
+qreal ShipItem::getCourseAngle()
 {
     return courseAngle;
 }
@@ -184,7 +176,7 @@ void ShipItem::setCourseAngle(const qreal &value)
     courseAngle = value;
 }
 
-quint16 ShipItem::getId() const
+quint16 ShipItem::getId()
 {
     return id;
 }
