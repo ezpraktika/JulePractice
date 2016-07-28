@@ -1,2 +1,6 @@
 build-Task2_Client-Desktop_Qt_5_5_1_MinGW_32bit-Debug/
 build-Task2_Server-Desktop_Qt_5_5_1_MinGW_32bit-Release/
+build-Task2_Server-Desktop_Qt_5_5_1_MinGW_32bit-Debug/
+build-Task2_Client-Desktop_Qt_5_5_1_MinGW_32bit-Release/
+Task2_Server/Task2_Server.pro.user
+Task2_Client/Task2_Client.pro.user
