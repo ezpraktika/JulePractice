@@ -6,13 +6,50 @@ MyScene::MyScene():QGraphicsScene(){
     pathWidth = 0;
 }
 
+MyScene::~MyScene()
+{
+
+}
+
+QVector<ShipItem *> MyScene::getShipList() const
+{
+    return shipList;
+}
+
+void MyScene::setShipList(const QVector<ShipItem *> &value)
+{
+    shipList = value;
+}
+
+bool MyScene::getIsPathVisible() const
+{
+    return isPathVisible;
+}
+
+void MyScene::setIsPathVisible(bool value)
+{
+    isPathVisible = value;
+}
+
+int MyScene::getPathWidth() const
+{
+    return pathWidth;
+}
+
+void MyScene::setPathWidth(int value)
+{
+    pathWidth = value;
+}
+
 
 void MyScene::drawBackground(QPainter *painter, const QRectF &rect){
 
     QPen pen(Qt::darkGray,2+pathWidth*0.5f,Qt::DashDotLine, Qt::SquareCap,Qt::RoundJoin);
     if(pathWidth>3) pen.setStyle(Qt::SolidLine);
+
     painter->setPen(pen);
 
+    //отрисовка пути, если включен чекбокс
     if (isPathVisible){
         for(int i = 0; i < shipList.size(); i++){
 
@@ -29,7 +66,7 @@ void MyScene::drawBackground(QPainter *painter, const QRectF &rect){
         painter->eraseRect(rect);
     }
 
-
+    //отрисовка сетки
     painter->save();
     painter->setPen(QPen(Qt::lightGray,1));
     int l = int(rect.left());

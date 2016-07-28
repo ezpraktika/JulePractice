@@ -28,6 +28,12 @@ class MyServer : public QWidget
 {
     Q_OBJECT
 
+public:
+    explicit MyServer(int port, QWidget *parent = 0);
+
+    ~MyServer();
+
+
 private:
     bool isClientConnected; //флаг наличия подключенных клиентов
 
@@ -37,15 +43,16 @@ private:
     QTcpSocket *socket;
 
     QStackedWidget *txtStack;   //стек для логов кораблей
-    QPushButton *prevButton;
-    QLabel *logNumber;
-    QPushButton *nextButton;
 
-    QPushButton *deleteShipButton;
+    QPushButton *prevButton;    //
+    QLabel *logNumber;          //панель управления логами
+    QPushButton *nextButton;    //
 
-    QLabel *messageLabel;
+    QPushButton *deleteShipButton;  //удалить корабль
 
-    QTimer *timer;
+    QLabel *messageLabel;   //панель сообщений
+
+    QTimer *timer;  //таймер генерации данных
 
     QVector <ShipItemStruct*> shipList; //вектор указателей на корабли
     quint16 shipCounter;        //количество кораблей
@@ -55,12 +62,7 @@ private:
     void createGui();                           //создание интерфейса
     void generateData(ShipItemStruct *ship);    //генерация данных
 
-public:
-    explicit MyServer(int port, QWidget *parent = 0);
-
-signals:
-
-public slots:
+private slots:
     void slotNewConnection();   //новое соединение
     void slotClientDisconnected(); //клиент отсоединился
     void sendAllData();         //отправка данных по всем кораблям

@@ -9,8 +9,8 @@ struct ShipItemStruct{
     qreal delta;                //
 
     quint16 isNew;      //новый корабль или нет
-    qreal startX;
-    qreal startY;
+    qreal startX;   //текущие координаты
+    qreal startY;   //
 
     quint16 id;         //индекс
     qreal courseAngle;  //курс

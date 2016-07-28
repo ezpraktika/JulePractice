@@ -24,21 +24,26 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0),
 
 }
 
+MyServer::~MyServer()
+{
+
+}
+
 //создание интерфейса
 void MyServer::createGui(){
 
     //панель управления логом
-    prevButton = new QPushButton("<<");
+    prevButton = new QPushButton("<<",this);
     prevButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     prevButton->setEnabled(false);
     connect(prevButton, SIGNAL(clicked(bool)),this,SLOT(slotPrevButton()));
 
-    nextButton = new QPushButton(">>");
+    nextButton = new QPushButton(">>",this);
     nextButton->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
     nextButton->setEnabled(false);
     connect(nextButton,SIGNAL(clicked(bool)),this,SLOT(slotNextButton()));
 
-    logNumber = new QLabel("1");
+    logNumber = new QLabel("1",this);
     logNumber->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     QHBoxLayout *logButtonsLayout = new QHBoxLayout;
@@ -49,10 +54,10 @@ void MyServer::createGui(){
     logButtonsLayout->addWidget(nextButton);
 
     //лог
-    txtStack = new QStackedWidget;
+    txtStack = new QStackedWidget(this);
     txtStack->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Expanding);
     txtStack->setFixedSize(screen.width()*PERCENT_OF_SCREEN*PERCENT_OF_SCREEN*0.7f, screen.height()*PERCENT_OF_SCREEN*0.7f);
-    QTextEdit *txt = new QTextEdit;
+    QTextEdit *txt = new QTextEdit(txtStack);
     txt->setReadOnly(true);
     txtStack->addWidget(txt);
 
@@ -62,16 +67,16 @@ void MyServer::createGui(){
     leftPanelLayout->addLayout(logButtonsLayout);
 
     //правая панель (кнопки создания и удаления кораблей)
-    QPushButton *createShipButton = new QPushButton ("Добавить корабль");
+    QPushButton *createShipButton = new QPushButton ("Добавить корабль",this);
     createShipButton->setFixedWidth(createShipButton->sizeHint().width()*1.3);
     connect(createShipButton,SIGNAL(clicked()),this,SLOT(slotNewShip()));
 
-    deleteShipButton = new QPushButton ("Удалить корабль");
+    deleteShipButton = new QPushButton ("Удалить корабль",this);
     deleteShipButton->setFixedWidth(createShipButton->sizeHint().width()*1.3);
     deleteShipButton->setEnabled(false);
     connect(deleteShipButton,SIGNAL(clicked(bool)),this,SLOT(slotDeleteShip()));
 
-    messageLabel=new QLabel;
+    messageLabel=new QLabel("",this);
 
 
     QVBoxLayout *rightPanelLayout = new QVBoxLayout;
@@ -154,7 +159,6 @@ void MyServer::slotDeleteShip(){
     shipList.remove(num-1);
 
     shipCounter--;
-    if(!shipCounter) timer->stop();
 
     //если это был последний корабль
     if(shipCounter==0){

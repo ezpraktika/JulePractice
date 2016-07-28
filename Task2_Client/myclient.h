@@ -34,7 +34,6 @@ class MyClient : public QWidget
 public:
     explicit MyClient(const QString& host, int port, QWidget *parent = 0);
 
-    //нужен?
     ~MyClient();
 
 private:
@@ -48,27 +47,28 @@ private:
     quint16 nextBlockSize;  //размер блока получаемых данных
 
     QStackedWidget *txtStack;   //стек логов кораблей
-    QPushButton *prevButton;
-    QLabel *logNumber;
-    QPushButton *nextButton;
 
-    QPushButton *connectButton;
-    QPushButton *clearPathButton;
+    QPushButton *prevButton;    //панель управления логами
+    QLabel *logNumber;          //
+    QPushButton *nextButton;    //
 
-    QSlider *shipSizeSlider;
+    QPushButton *connectButton;     //кнопка подключения
+    QPushButton *clearPathButton;   //кнопка очистки путей
 
-    QLabel *messageLabel;
+    QSlider *shipSizeSlider;    //слайдер размеров корабля
+
+    QLabel *messageLabel;   //панель сообщений
 
     MyScene *scene;  //сцена (карта)
 
     QSet <quint16> idOfExistingShips;         //ID кораблей, о которых знает клиент
-    quint16 shipCounter;            //количество кораблей
+    quint16 shipCounter;                      //количество кораблей
 
 
     QPainter* painterScene;
 
 
-    void createGui();   //создание интерфейса
+    void createGui();           //создание интерфейса
     void deleteShip(int num);   //удаление корабля по номеру лога
     void clearAllData();        //удаление всех данных (после дисконнекта)
 
@@ -78,16 +78,16 @@ private slots:
     void slotError(QAbstractSocket::SocketError err);   //сообщения об ошибках
 
     void slotReactToToggleViewCheckBox(bool checked);   //вкл/выкл область видимости
-    void slotShipResize(int); //изменение размеров корабля
+    void slotShipResize(int);                           //изменение размеров корабля
 
-    void slotReactToTogglePathCheckBox(bool checked);
-    void slotPathResize(int);
+    void slotReactToTogglePathCheckBox(bool checked);   //вкл/выкл пути
+    void slotPathResize(int);                           //изменение ширины пути
 
     void slotConnectButton();   //подключение к серверу
     void slotNextButton();      //следующий лог
     void slotPrevButton();      //предыдущий лог
 
-    void slotClearAllPaths();
+    void slotClearAllPaths();   //очистка путей
 };
 
 #endif // MYCLIENT_H

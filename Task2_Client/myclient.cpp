@@ -34,38 +34,38 @@ void MyClient::createGui(){
 
     //панель управления отрисовкой
 
-    connectButton = new QPushButton("Connect");
+    connectButton = new QPushButton("Connect",this);
     connectButton->setFixedWidth(connectButton->sizeHint().width()*2);
 
     connect(connectButton,SIGNAL(clicked(bool)),connectButton,SLOT(setEnabled(bool)));
     connect(connectButton,SIGNAL(clicked(bool)),this,SLOT(slotConnectButton()));
 
-    messageLabel = new QLabel;
+    messageLabel = new QLabel("",this);
 
-    QCheckBox *showPathCheckBox = new QCheckBox("Путь");
+    QCheckBox *showPathCheckBox = new QCheckBox("Путь",this);
     showPathCheckBox->setChecked(true);
     connect(showPathCheckBox,SIGNAL(toggled(bool)),this,SLOT(slotReactToTogglePathCheckBox(bool)));
 
-    QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора");
+    QCheckBox *showViewCheckBox = new QCheckBox("Угол обзора",this);
     showViewCheckBox->setChecked(true);
     connect(showViewCheckBox,SIGNAL(toggled(bool)),this,SLOT(slotReactToToggleViewCheckBox(bool)));
 
-    QLabel *shipSizeLabel = new QLabel("Размер корабля");
-    QLabel *pathSizeLabel = new QLabel("Ширина пути");
+    QLabel *shipSizeLabel = new QLabel("Размер корабля",this);
+    QLabel *pathSizeLabel = new QLabel("Ширина пути",this);
 
-    shipSizeSlider = new QSlider(Qt::Horizontal);
+    shipSizeSlider = new QSlider(Qt::Horizontal,this);
     shipSizeSlider->setMaximumWidth(120);
     shipSizeSlider->setMinimum(0);
     shipSizeSlider->setMaximum(5);
     connect(shipSizeSlider,SIGNAL(valueChanged(int)),this,SLOT(slotShipResize(int)));
 
-    QSlider *pathSizeSlider = new QSlider(Qt::Horizontal);
+    QSlider *pathSizeSlider = new QSlider(Qt::Horizontal,this);
     pathSizeSlider->setMaximumWidth(120);
     pathSizeSlider->setMinimum(0);
     pathSizeSlider->setMaximum(7);
     connect(pathSizeSlider,SIGNAL(valueChanged(int)),this,SLOT(slotPathResize(int)));
 
-    clearPathButton = new QPushButton("Стереть пути");
+    clearPathButton = new QPushButton("Стереть пути",this);
     connect(clearPathButton,SIGNAL(clicked(bool)),this,SLOT(slotClearAllPaths()));
 
     QVBoxLayout *connectLayout = new QVBoxLayout;
@@ -134,7 +134,7 @@ void MyClient::createGui(){
 
     txtStack = new QStackedWidget;
     txtStack->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Expanding);
-    QTextEdit *txt = new QTextEdit;
+    QTextEdit *txt = new QTextEdit(txtStack);
     txt->setReadOnly(true);
     txtStack->addWidget(txt);
 
@@ -158,6 +158,7 @@ void MyClient::createGui(){
 
 }
 
+//считывание данных
 void MyClient::slotReadyRead()
 {
     QDataStream in(socket);
@@ -180,12 +181,14 @@ void MyClient::slotReadyRead()
         }
 
         //количество кораблей, данные о которых генерируются на сервере
-        quint16 serverShipCounter, /*inputIsNew,*/ inputID;
+        quint16 serverShipCounter, inputID;
 
+        //количество удаленных кораблей
         int numOfRemovedShips;
 
         in >> numOfRemovedShips;
 
+        //клиент удаляет у себя корабли, удаленные на сервере
         if(numOfRemovedShips){
             quint16 removeLogNumber;
             for(int k = 0; k < numOfRemovedShips; k++){
@@ -195,11 +198,10 @@ void MyClient::slotReadyRead()
             }
         }
 
-        in >> serverShipCounter;
-
-
+        in >> serverShipCounter;    //количество кораблей на сервере
 
         for(int j = 0;j<serverShipCounter;j++){
+
             in >> inputID;
 
             bool newOnThisClient = !idOfExistingShips.contains(inputID);
@@ -230,7 +232,7 @@ void MyClient::slotReadyRead()
             scene->shipList.at(j)->isNew = newOnThisClient;
 
             //и считываем остальные данные
-            in >> scene->shipList.at(j)->startX
+            in >> scene->getShipList().at(j)->startX
                >> scene->shipList.at(j)->startY
                >> scene->shipList.at(j)->courseAngle
                >> scene->shipList.at(j)->speed
@@ -260,10 +262,6 @@ void MyClient::slotReadyRead()
         scene->advance();
 
     }
-/*
-    scene->drawBackground(painterScene,scene->sceneRect());
-    scene->advance();*/
-
 }
 
 //вкл/выкл область видимости
@@ -276,7 +274,6 @@ void MyClient::slotReactToToggleViewCheckBox(bool checked)
 
 //вкл/выкл путь
 void MyClient::slotReactToTogglePathCheckBox(bool checked){
-
     scene->isPathVisible = checked;
 }
 
@@ -310,31 +307,30 @@ void MyClient::slotConnected()
     connectButton->setEnabled(true);
 }
 
-
 //сообщения об ошибках
 void MyClient::slotError(QAbstractSocket::SocketError err)
 {
     switch(err){
+
     case QAbstractSocket::HostNotFoundError:
         messageLabel->setText("The host was not found");
         break;
-    case QAbstractSocket::RemoteHostClosedError:
 
+    case QAbstractSocket::RemoteHostClosedError:
         clearAllData();
         messageLabel->setText("The remote host is closed");
         break;
+
     case QAbstractSocket::ConnectionRefusedError:
         messageLabel->setText("The connection was refused");
         connectButton->setEnabled(true);
         break;
+
     default:
         messageLabel->setText(QString(socket->errorString()));
         break;
     }
-
-
 }
-
 
 //изменение размеров корабля
 void MyClient::slotShipResize(int val){
@@ -387,6 +383,7 @@ void MyClient::slotPrevButton()
     if(num == 1) prevButton->setEnabled(false);
 }
 
+//очистка путей
 void MyClient::slotClearAllPaths()
 {
     for(int i = 0; i < scene->shipList.size(); i++){
@@ -470,5 +467,5 @@ void MyClient::clearAllData()
 
 MyClient::~MyClient()
 {
-
+    delete scene;
 }

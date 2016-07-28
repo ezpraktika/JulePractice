@@ -6,6 +6,11 @@ ShipItem::ShipItem()
     isViewVisible = true;
 }
 
+ShipItem::~ShipItem()
+{
+
+}
+
 QRectF ShipItem::boundingRect() const
 {
     float edge = viewLength * qTan(qDegreesToRadians(viewAngle/2));
@@ -15,6 +20,7 @@ QRectF ShipItem::boundingRect() const
 
 void ShipItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+    //корабль
     QPolygonF polygon;
     polygon << QPoint(-20,-5) << QPoint(10,-5) << QPoint(15,0) << QPoint(10,5) << QPoint(-20,5);
 
@@ -24,6 +30,8 @@ void ShipItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     painter->drawText(-5,-15,QString::number(id+1));
 
     polygon.clear();
+
+    //область видимости
     if(isViewVisible){
         float edge = viewLength * qTan(qDegreesToRadians(viewAngle/2));
         polygon << QPoint(10,0) << QPoint(viewLength+10,edge) << QPoint(viewLength+10,-edge);
@@ -32,17 +40,12 @@ void ShipItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         painter->drawPolygon(polygon);
     }
 
-
     painter->setBrush(Qt::NoBrush);
-
-
-    //painter->drawRect(boundingRect());
-
 }
 
 void ShipItem::advance(int phase)
 {
-    // обнулить isNew после первоначальной отрисовки
+
     if (!phase) return;
 
     if (isNew){
@@ -57,7 +60,137 @@ void ShipItem::advance(int phase)
 
     setPos(startX,startY);      //переместить по новым координатам
     setRotation(courseAngle);   //повернуть в соответствии с курсом
-    setScale(1+shipSize*0.2);         //увеличить размеры
+    setScale(1+shipSize*0.2);   //увеличить размеры
 
+}
+
+QVector<QPointF> ShipItem::getPoints() const
+{
+    return points;
+}
+
+void ShipItem::setPoints(const QVector<QPointF> &value)
+{
+    points = value;
+}
+
+qreal ShipItem::getStartY() const
+{
+    return startY;
+}
+
+void ShipItem::setStartY(const qreal &value)
+{
+    startY = value;
+}
+
+qreal ShipItem::getStartX() const
+{
+    return startX;
+}
+
+void ShipItem::setStartX(const qreal &value)
+{
+    startX = value;
+}
+
+quint16 ShipItem::getIsNew() const
+{
+    return isNew;
+}
+
+void ShipItem::setIsNew(const quint16 &value)
+{
+    isNew = value;
+}
+
+bool ShipItem::getIsViewVisible() const
+{
+    return isViewVisible;
+}
+
+void ShipItem::setIsViewVisible(bool value)
+{
+    isViewVisible = value;
+}
+
+quint16 ShipItem::getShipSize() const
+{
+    return shipSize;
+}
+
+void ShipItem::setShipSize(const quint16 &value)
+{
+    shipSize = value;
+}
+
+qreal ShipItem::getPathLength() const
+{
+    return pathLength;
+}
+
+void ShipItem::setPathLength(const qreal &value)
+{
+    pathLength = value;
+}
+
+int ShipItem::getTime() const
+{
+    return time;
+}
+
+void ShipItem::setTime(int value)
+{
+    time = value;
+}
+
+quint16 ShipItem::getViewLength() const
+{
+    return viewLength;
+}
+
+void ShipItem::setViewLength(const quint16 &value)
+{
+    viewLength = value;
+}
+
+qreal ShipItem::getViewAngle() const
+{
+    return viewAngle;
+}
+
+void ShipItem::setViewAngle(const qreal &value)
+{
+    viewAngle = value;
+}
+
+quint16 ShipItem::getSpeed() const
+{
+    return speed;
+}
+
+void ShipItem::setSpeed(const quint16 &value)
+{
+    speed = value;
+}
+
+qreal ShipItem::getCourseAngle() const
+{
+    return courseAngle;
+}
+
+void ShipItem::setCourseAngle(const qreal &value)
+{
+    courseAngle = value;
+}
+
+quint16 ShipItem::getId() const
+{
+    return id;
+}
+
+void ShipItem::setId(const quint16 &value)
+{
+    id = value;
 }
 
