@@ -53,6 +53,7 @@ private:
     QPushButton *nextButton;
 
     QPushButton *connectButton;
+    QPushButton *clearPathButton;
     QLabel *messageLabel;
 
     MyScene *scene;  //сцена (карта)
@@ -65,6 +66,8 @@ private:
 
 
     void createGui();   //создание интерфейса
+    void deleteShip(int num);   //удаление корабля по номеру лога
+    void clearAllData();        //удаление всех данных (после дисконнекта)
 
 private slots:
     void slotConnected();   //соединение установлено
@@ -81,8 +84,7 @@ private slots:
     void slotNextButton();      //следующий лог
     void slotPrevButton();      //предыдущий лог
 
-    void deleteShip(int num);   //удаление корабля по номеру лога
-    void clearAllData();        //удаление всех данных (после дисконнекта)
+    void slotClearAllPaths();
 };
 
 #endif // MYCLIENT_H

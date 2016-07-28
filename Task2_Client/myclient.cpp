@@ -72,7 +72,8 @@ void MyClient::createGui(){
     pathSizeSlider->setMaximum(5);
     connect(pathSizeSlider,SIGNAL(valueChanged(int)),this,SLOT(slotPathResize(int)));
 
-
+    clearPathButton = new QPushButton("Стереть пути");
+    connect(clearPathButton,SIGNAL(clicked(bool)),this,SLOT(slotClearAllPaths()));
 
     QVBoxLayout *connectLayout = new QVBoxLayout;
     connectLayout->addWidget(connectButton);
@@ -91,6 +92,10 @@ void MyClient::createGui(){
     sliderLayout->addWidget(shipSizeSlider);
     sliderLayout->addWidget(pathSizeSlider);
 
+    QVBoxLayout *clearPathLayout = new QVBoxLayout;
+    clearPathLayout->addWidget(clearPathButton);
+    clearPathLayout->insertStretch(-1);
+
     QHBoxLayout *controlButtons= new QHBoxLayout;
     controlButtons->addLayout(connectLayout);
     controlButtons->insertStretch(-1);
@@ -99,6 +104,9 @@ void MyClient::createGui(){
     controlButtons->addLayout(labelLayout);
     controlButtons->addLayout(sliderLayout);
     controlButtons->insertStretch(-1);
+
+    controlButtons->addLayout(clearPathLayout);
+
 
     //левая часть окна
 
@@ -381,6 +389,14 @@ void MyClient::slotPrevButton()
 
     //если это первая страница, отключаем кнопку "<<"
     if(num == 1) prevButton->setEnabled(false);
+}
+
+void MyClient::slotClearAllPaths()
+{
+    for(int i = 0; i < scene->shipList.size(); i++){
+        scene->shipList.at(i)->points.clear();
+    }
+
 }
 
 //удаление корабля с номером лога num

@@ -29,7 +29,7 @@ public:
     qreal startX;   //координаты на текущем этапе
     qreal startY;   //
 
-    QVector<QPointF> points; // KKK
+    QVector<QPointF> points; //путь
 
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
