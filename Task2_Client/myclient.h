@@ -20,6 +20,7 @@
 #include <QSizePolicy>
 #include <QStackedWidget>
 #include <QTimer>
+#include <QSet>
 
 
 #include "shipitem.h"
@@ -37,6 +38,8 @@ public:
     ~MyClient();
 
 private:
+    bool isConnected; //флаг подключения к серверу
+
     QRect screen; //экран (для получения размеров)
 
     QString host;
@@ -54,7 +57,7 @@ private:
 
     MyScene *scene;  //сцена (карта)
 
-//    QVector <ShipItem*> shipList;   //вектор кораблей
+    QSet <quint16> idOfExistingShips;         //ID кораблей, о которых знает клиент
     quint16 shipCounter;            //количество кораблей
 
 
@@ -79,6 +82,7 @@ private slots:
     void slotPrevButton();      //предыдущий лог
 
     void deleteShip(int num);   //удаление корабля по номеру лога
+    void clearAllData();        //удаление всех данных (после дисконнекта)
 };
 
 #endif // MYCLIENT_H

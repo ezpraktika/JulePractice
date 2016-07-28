@@ -55,9 +55,9 @@ void ShipItem::advance(int phase)
         points.append(QPointF(startX,startY));
     }
 
-    setPos(startX,startY);
-    setRotation(courseAngle);
-    setScale(shipSize); // привязать к ползунку(масштаб)
+    setPos(startX,startY);      //переместить по новым координатам
+    setRotation(courseAngle);   //повернуть в соответствии с курсом
+    setScale(shipSize);         //увеличить размеры
 
 }
 

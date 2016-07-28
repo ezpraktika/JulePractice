@@ -5,10 +5,12 @@ MyServer::MyServer(int port, QWidget *parent) : QWidget(parent), shipCounter(0),
 {
     server = new QTcpServer(this);
     if(!server->listen(QHostAddress::Any , port)){
-        qDebug() << "Error\n";
+        messageLabel -> setText("Port error");
         server->close();
         return;
     }
+
+    isClientConnected = false;
 
     qsrand(QTime::currentTime().msec());
     screen = QApplication::desktop()->screenGeometry();
@@ -90,8 +92,17 @@ void MyServer::createGui(){
 //слот - новое подключение
 void MyServer::slotNewConnection(){
     socket = server->nextPendingConnection();
+    connect (socket,SIGNAL(disconnected()),this,SLOT(slotClientDisconnected()));
     connect(socket,SIGNAL(disconnected()),socket,SLOT(deleteLater()));
+    isClientConnected = true;
     messageLabel->setText("Client connected");
+}
+
+//слот - дисконнект клиента
+void MyServer::slotClientDisconnected(){
+    messageLabel -> setText("Client disconnected");
+    isClientConnected = false;
+    socket->close();
 }
 
 //слот - создание нового корабля
@@ -111,7 +122,7 @@ void MyServer::slotNewShip(){
 
 
         //shipCounter++;
-        timer->start(300); // TIMER
+        timer->start(1000); // TIMER
     }
 
     //если не первый корабль
@@ -143,6 +154,7 @@ void MyServer::slotDeleteShip(){
     shipList.remove(num-1);
 
     shipCounter--;
+    if(!shipCounter) timer->stop();
 
     //если это был последний корабль
     if(shipCounter==0){
@@ -177,10 +189,6 @@ void MyServer::slotDeleteShip(){
 
     messageLabel->setText(QString("Ship (ID: %1) - deleted").arg(idOfDeleted+1));
     logNumbersOfRemovedShips.append(num);         //добавить в список номер лога удаленного корабля
-
-    qDebug()<<"ship counter after delete: "<<shipCounter;
-    qDebug()<<"shipList size: "<<shipList.size();
-    qDebug()<<"stack widget size: " <<txtStack->size();
 
 }
 
@@ -244,16 +252,11 @@ void MyServer::sendAllData(){
     for(int i=0; i < shipCounter; i++){
 
         generateData(shipList.at(i));   //генерируем новые данные
-        qDebug()<<"count: "<< shipCounter<<"\nid "<<shipList.at(i)->id<<"\nisnew "<< shipList.at(i)->isNew;
 
-        out << shipList.at(i)->id << shipList.at(i)->isNew;
-
-        //если корабль новый, то записываем стартовые координаты
-        if(shipList.at(i)->isNew){
-            out << shipList.at(i)->startX << shipList.at(i)->startY;
-        }
-
-        out << shipList.at(i)->courseAngle
+        out << shipList.at(i)->id
+            << shipList.at(i)->startX
+            << shipList.at(i)->startY
+            << shipList.at(i)->courseAngle
             << shipList.at(i)->speed
             << shipList.at(i)->viewAngle
             << shipList.at(i)->viewLength
@@ -281,7 +284,7 @@ void MyServer::sendAllData(){
 
     out.device()->seek(0);  //переход в начало блока
     out<<quint16(block.size()-sizeof(quint16)); //размер блока данных
-    socket->write(block);   //посылка
+    if(isClientConnected) socket->write(block);   //посылка клиенту, если он подключен
     block.clear();          //очистка используемого блока
 
     if(!deleteShipButton->isEnabled()&& shipCounter>0) deleteShipButton->setEnabled(true);
@@ -295,9 +298,9 @@ void MyServer::generateData(ShipItemStruct *ship){
         ship->startX=100;
         ship->startY=100;
         ship->id=shipIndexCounter;
-        ship->courseAngle=0.0f; //SET ROTATION РАБОТАЕТ В ГРАДУСАХ
+        ship->courseAngle=0.0f;
         ship->speed=20;
-        ship->viewAngle = 35.0f;  //не забыть стартовать время и офать isNEW
+        ship->viewAngle = 35.0f;
         ship->viewLength = 100;
         ship->timer.start();
         ship->time=0;
@@ -362,12 +365,11 @@ void MyServer::generateData(ShipItemStruct *ship){
                }
             }
         }
-        qDebug()<<"course before delta "<<ship->courseAngle;
+
         ship->courseAngle+=ship->delta; //меняем курс в соответствии с ранее выбранной дельтой
         ship->deltaCount--;
-        qDebug()<<"course after delta "<<ship->courseAngle;
+
         if(ship->courseAngle>180.0f) {
-            qDebug()<<"attention"<<ship->courseAngle;
             ship->courseAngle=-180.0f;  //чтобы полный круг был
         }
         if(ship->courseAngle<-180.0f) ship->courseAngle=+180.0f; //

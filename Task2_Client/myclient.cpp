@@ -7,6 +7,10 @@ MyClient::MyClient(const QString& host, int port, QWidget *parent) :
 {
     screen = QApplication::desktop()->screenGeometry();
 
+    isConnected = false;
+
+    socket=new QTcpSocket(this);
+
     this->host=host;
     this->port=port;
 
@@ -39,10 +43,11 @@ void MyClient::createGui(){
 
     connectButton = new QPushButton("Connect");
     connectButton->setFixedWidth(connectButton->sizeHint().width()*2);
-    connect(connectButton,SIGNAL(clicked(bool)),this,SLOT(slotConnectButton()));
-    connect(connectButton,SIGNAL(clicked(bool)),connectButton,SLOT(setEnabled(bool)));
-    messageLabel = new QLabel;
 
+    connect(connectButton,SIGNAL(clicked(bool)),connectButton,SLOT(setEnabled(bool)));
+    connect(connectButton,SIGNAL(clicked(bool)),this,SLOT(slotConnectButton()));
+
+    messageLabel = new QLabel;
 
     QCheckBox *showPathCheckBox = new QCheckBox("Путь");
     showPathCheckBox->setChecked(true);
@@ -67,6 +72,8 @@ void MyClient::createGui(){
     pathSizeSlider->setMaximum(5);
     connect(pathSizeSlider,SIGNAL(valueChanged(int)),this,SLOT(slotPathResize(int)));
 
+
+
     QVBoxLayout *connectLayout = new QVBoxLayout;
     connectLayout->addWidget(connectButton);
     connectLayout->addWidget(messageLabel);
@@ -76,8 +83,9 @@ void MyClient::createGui(){
     checkBoxLayout->addWidget(showViewCheckBox);
 
     QVBoxLayout *labelLayout = new QVBoxLayout;
-    labelLayout->addWidget(shipSizeLabel);
     labelLayout->addWidget(pathSizeLabel);
+    labelLayout->addWidget(shipSizeLabel);
+
 
     QVBoxLayout *sliderLayout = new QVBoxLayout;
     sliderLayout->addWidget(shipSizeSlider);
@@ -170,7 +178,7 @@ void MyClient::slotReadyRead()
         }
 
         //количество кораблей, данные о которых генерируются на сервере
-        quint16 serverShipCounter, inputIsNew, inputID;
+        quint16 serverShipCounter, /*inputIsNew,*/ inputID;
 
         int numOfRemovedShips;
 
@@ -180,7 +188,8 @@ void MyClient::slotReadyRead()
             quint16 removeLogNumber;
             for(int k = 0; k < numOfRemovedShips; k++){
                 in >> removeLogNumber;
-                deleteShip(removeLogNumber);
+                if(removeLogNumber<=shipCounter) deleteShip(removeLogNumber);  //если на клиенте изначально не было корабля,
+                                                                                //который сервер удалил, то функция удаления не вызывается
             }
         }
 
@@ -189,12 +198,16 @@ void MyClient::slotReadyRead()
 
 
         for(int j = 0;j<serverShipCounter;j++){
-            in >> inputID >> inputIsNew;
+            in >> inputID /*>> inputIsNew*/;
+
+            bool newOnThisClient = !idOfExistingShips.contains(inputID);
 
             //если данные о новом корабле
-            if(inputIsNew){
+            if(newOnThisClient){
+                idOfExistingShips.insert(inputID);
+
                 ShipItem *ship = new ShipItem;  //создаем новый корабль
-                scene->shipList.append(ship);          //помещаем его в вектор
+                scene->shipList.append(ship);   //помещаем его в вектор
                 scene->addItem(ship);           //и добавляем на сцену
 
                 shipCounter++;          //количество кораблей увеличилось
@@ -204,29 +217,24 @@ void MyClient::slotReadyRead()
                     QTextEdit *txt = new QTextEdit; //создаем лог для нового корабля
                     txt->setReadOnly(true);         //
                     txtStack->addWidget(txt);       //и добавляем в стек виджетов
-                    qDebug()<<"in is new";
-                    qDebug()<<"ship count " <<shipCounter;
                     nextButton->setEnabled(true);
                 }
-
-                in >> scene->shipList.at(j)->startX  //считываем начальные координаты
-                        >> scene->shipList.at(j)->startY; //
-
-
             }
 
 
-            //помещаем в корабль считанные ранее параметры
+            //помещаем в корабль считанный ранее ID
             scene->shipList.at(j)->id = inputID;
-            scene->shipList.at(j)->isNew = inputIsNew;
+            scene->shipList.at(j)->isNew = newOnThisClient;
 
-            //и считываем остальные
-            in >> scene->shipList.at(j)->courseAngle
-                    >> scene->shipList.at(j)->speed
-                    >> scene->shipList.at(j)->viewAngle
-                    >> scene->shipList.at(j)->viewLength
-                    >> scene->shipList.at(j)->pathLength
-                    >> scene->shipList.at(j)->time;
+            //и считываем остальные данные
+            in >> scene->shipList.at(j)->startX
+               >> scene->shipList.at(j)->startY
+               >> scene->shipList.at(j)->courseAngle
+               >> scene->shipList.at(j)->speed
+               >> scene->shipList.at(j)->viewAngle
+               >> scene->shipList.at(j)->viewLength
+               >> scene->shipList.at(j)->pathLength
+               >> scene->shipList.at(j)->time;
 
             //получаем указатель на нужный лог и записываем в него все считанные данные
             QTextEdit *te = (QTextEdit*)txtStack->widget(j);
@@ -245,10 +253,13 @@ void MyClient::slotReadyRead()
         }
         //новый блок данных
         nextBlockSize = 0;
-    }
+        scene->drawBackground(painterScene,scene->sceneRect());
+        scene->advance();
 
+    }
+/*
     scene->drawBackground(painterScene,scene->sceneRect());
-    scene->advance();
+    scene->advance();*/
 
 }
 
@@ -260,6 +271,7 @@ void MyClient::slotReactToToggleViewCheckBox(bool checked)
     }
 }
 
+//вкл/выкл путь
 void MyClient::slotReactToTogglePathCheckBox(bool checked){
 
     scene->isPathVisible = checked;
@@ -267,17 +279,29 @@ void MyClient::slotReactToTogglePathCheckBox(bool checked){
 
 //подключиться к серверу
 void MyClient::slotConnectButton(){
-    socket=new QTcpSocket(this);
-    socket->connectToHost(host,port);
 
-    connect(socket,SIGNAL(connected()),SLOT(slotConnected()));
-    connect(socket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
-    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
+    //если клиент уже подключен к серверу - закрываем сокет(кнопка disconnect)
+    if(isConnected){
+
+        clearAllData();
+        messageLabel->setText("Disconnected");
+
+    }
+    //если клиент еще не подключен к серверу - пытаемся подключиться(кнопка connect)
+    else{
+        socket->connectToHost(host,port);
+
+        connect(socket,SIGNAL(connected()),SLOT(slotConnected()));
+        connect(socket, SIGNAL(readyRead()), SLOT(slotReadyRead()));
+        connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
+
+    }
 }
 
 //соединение установлено
 void MyClient::slotConnected()
 {
+    isConnected = true;
     messageLabel->setText("Connected");
     connectButton->setText("Disconnect");
     connectButton->setEnabled(true);
@@ -293,6 +317,7 @@ void MyClient::slotError(QAbstractSocket::SocketError err)
         break;
     case QAbstractSocket::RemoteHostClosedError:
         messageLabel->setText("The remote host is closed");
+        clearAllData();
         break;
     case QAbstractSocket::ConnectionRefusedError:
         messageLabel->setText("The connection was refused");
@@ -314,6 +339,7 @@ void MyClient::slotShipResize(int val){
     }
 }
 
+//изменение ширины пути
 void MyClient::slotPathResize(int val){
     scene->pathWidth = val;
 }
@@ -369,6 +395,7 @@ void MyClient::deleteShip(int num)
 
     //удаляем корабль из сцены и вектора
     ShipItem *ship = scene->shipList.at(num-1);
+    idOfExistingShips.remove(ship->id);
     scene->removeItem(ship);
     scene->shipList.remove(num-1);
     delete ship;
@@ -407,8 +434,23 @@ void MyClient::deleteShip(int num)
 
     messageLabel->setText(QString("Ship (ID: %1) has been deleted").arg(idOfDeleted+1));
 
+}
 
-    //удалить объект со сцены
+//удаление всех данных
+void MyClient::clearAllData()
+{
+    socket->close();
+
+    for(int i = 1; i <= shipCounter; i++){
+        deleteShip(i);
+    }
+
+    connectButton->setText("Connect");
+    connectButton->setEnabled(true);
+
+
+
+    isConnected = false;
 
 }
 

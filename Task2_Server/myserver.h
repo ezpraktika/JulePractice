@@ -29,6 +29,8 @@ class MyServer : public QWidget
     Q_OBJECT
 
 private:
+    bool isClientConnected; //флаг наличия подключенных клиентов
+
     QRect screen;   //экран (для получения размеров)
 
     QTcpServer *server;
@@ -60,6 +62,7 @@ signals:
 
 public slots:
     void slotNewConnection();   //новое соединение
+    void slotClientDisconnected(); //клиент отсоединился
     void sendAllData();         //отправка данных по всем кораблям
     void slotNewShip();         //создание корабля
     void slotDeleteShip();      //удаление корабля
